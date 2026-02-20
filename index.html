@@ -26,21 +26,31 @@
 
   <style>
     :root{
-      --brand: #0f766e;        /* teal-700 */
-      --brand2:#14532d;        /* green-900 */
-      --accent:#f59e0b;        /* amber-500 */
-      --danger:#ef4444;        /* red-500 */
-      --ink:   #0f172a;        /* slate-900 */
-      --muted: #64748b;        /* slate-500 */
-      --bg:    #f8fafc;        /* slate-50 */
+      --brand: #0f766e;
+      --brand2:#14532d;
+      --accent:#f59e0b;
+      --danger:#ef4444;
+      --ink:   #0f172a;
+      --muted: #64748b;
+      --bg:    #f8fafc;
       --card:  #ffffff;
-      --line:  #e2e8f0;        /* slate-200 */
+      --line:  #e2e8f0;
     }
-    html, body { font-family: Cairo, system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent; }
-    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    html, body {
+      font-family: Cairo, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    * { box-sizing: border-box; }
+    button { touch-action: manipulation; }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
 
-    /* App background */
     .app-bg{
       background: radial-gradient(1200px 600px at 10% 0%, rgba(15,118,110,.08), transparent 60%),
                   radial-gradient(900px 500px at 90% 0%, rgba(245,158,11,.10), transparent 55%),
@@ -48,14 +58,28 @@
       background-attachment: fixed;
     }
 
-    /* Scrollbars */
-    .table-wrap::-webkit-scrollbar{ height: 8px; }
+    .table-wrap::-webkit-scrollbar{ height: 8px; width: 8px; }
     .table-wrap::-webkit-scrollbar-thumb{ background: #cbd5e1; border-radius: 999px; }
     .table-wrap::-webkit-scrollbar-track{ background: #f1f5f9; border-radius: 999px; }
 
-    /* Bottom Nav Padding for mobile */
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-    .mobile-main-pad { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+    .mobile-main-pad { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+
+    /* simple animation utility (بديل tailwindcss-animate) */
+    .animate-in { animation-fill-mode: both; }
+    .fade-in { animation-name: fadeInUp; }
+    .duration-200 { animation-duration: 200ms; }
+    .duration-300 { animation-duration: 300ms; }
+    .slide-in-from-bottom-4 { --fromY: 16px; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(var(--fromY, 0)); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .animate-in, .fade-in { animation: none !important; }
+      * { scroll-behavior: auto !important; }
+    }
   </style>
 </head>
 
@@ -71,7 +95,7 @@
     const { useEffect, useMemo, useState } = React;
 
     /***********************
-     * Icons Library
+     * Icons
      ***********************/
     const ICONS = {
       menu: (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>),
@@ -93,24 +117,17 @@
       printer: (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9V4h12v5"/><path d="M6 18h12v2H6z"/><path d="M6 14h12v4H6z"/><path d="M6 13H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/></svg>),
       lock: (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>),
       settings: (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="3"/></svg>),
-
-      /* ✅ Added: car icon (كان ناقص) */
-      car: (p) => (
-        <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13v5a1 1 0 0 1-1 1h-1"/>
-          <path d="M5 19H4a1 1 0 0 1-1-1v-5"/>
-          <path d="M6 7l1.2-2.2A2 2 0 0 1 9 4h6a2 2 0 0 1 1.8.8L18 7"/>
-          <circle cx="7.5" cy="17.5" r="1.5"/>
-          <circle cx="16.5" cy="17.5" r="1.5"/>
-          <path d="M3 13h18"/>
-        </svg>
-      ),
-
+      car: (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 16l1-5a3 3 0 0 1 3-2h10a3 3 0 0 1 3 2l1 5"/><path d="M5 16h14"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/><path d="M6 9l2-3h8l2 3"/></svg>),
       brand: (p) => (
         <svg {...p} viewBox="0 0 64 64" fill="none">
-          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="var(--brand)"/><stop offset="1" stopColor="var(--brand2)"/></linearGradient></defs>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="var(--brand)"/>
+              <stop offset="1" stopColor="var(--brand2)"/>
+            </linearGradient>
+          </defs>
           <path d="M34 6c10 0 18 10 18 24S44 58 34 58 16 44 16 30 24 6 34 6Z" fill="url(#g1)" opacity=".16"/>
-          <path d="M32 10c9 0 16 9 16 21S41 54 32 54 16 44 16 31 23 10 32 10Z" fill="url(#g1)" />
+          <path d="M32 10c9 0 16 9 16 21S41 54 32 54 16 44 16 31 23 10 32 10Z" fill="url(#g1)"/>
           <path d="M40 18c7 2 10 8 10 13-6-2-12-5-16-10 2-2 4-3 6-3Z" fill="var(--accent)" opacity=".9"/>
           <circle cx="27" cy="30" r="2.2" fill="#0b1220" opacity=".85"/>
           <path d="M25 38c2 3 5 5 8 5 4 0 7-2 10-6" stroke="#0b1220" strokeWidth="3" strokeLinecap="round" opacity=".35"/>
@@ -145,24 +162,27 @@
      * Auth & Roles
      ***********************/
     const DEFAULT_USERS = [
-      { id: 1, username: "alamal", displayName: "المدير", pin: "1234", role: "admin" },
-      { id: 2, username: "ali", displayName: "علي (بيانات)", pin: "0000", role: "clerk" },
+      { id: 1, username: "owner", displayName: "مالك النظام", pin: "2580", role: "admin" },
+      { id: 2, username: "ali",   displayName: "علي (تسجيل بيانات)", pin: "1470", role: "clerk" },
     ];
 
     const ROLE_TABS = {
-      admin: ["dashboard", "treasury", "settlements", "sales", "purchases", "expenses", "receipts", "products", "customers", "suppliers", "drivers", "settings"],
-      clerk: ["sales", "purchases", "expenses", "receipts", "settings"],
+      admin: ["dashboard","treasury","settlements","sales","purchases","expenses","receipts","products","customers","suppliers","drivers","settings"],
+      clerk: ["sales","purchases","expenses","receipts","settings"],
     };
     function canSeeTab(role, tabId){ return (ROLE_TABS[role] || []).includes(tabId); }
 
     /***********************
      * UI Components
      ***********************/
-    const Card = ({ children, className = "" }) => <div className={`bg-white p-4 sm:p-6 rounded-2xl shadow-soft border border-slate-100 ${className}`}>{children}</div>;
+    const Card = ({ children, className = "" }) => (
+      <div className={`bg-white p-4 sm:p-6 rounded-2xl shadow-soft border border-slate-100 ${className}`}>{children}</div>
+    );
 
     const Notice = ({ variant="info", children }) => {
       const styles = variant === "info" ? "bg-emerald-50 border-emerald-200 text-emerald-900" :
-                     variant === "warn" ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-red-50 border-red-200 text-red-900";
+                     variant === "warn" ? "bg-amber-50 border-amber-200 text-amber-900" :
+                     "bg-red-50 border-red-200 text-red-900";
       return <div className={`border p-4 rounded-2xl ${styles}`}>{children}</div>;
     };
 
@@ -174,29 +194,46 @@
       </div>
     );
 
-    const Input = (props) => <input {...props} className={`border border-slate-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700/50 transition w-full ${props.className||""}`} />;
-    const Select = (props) => <select {...props} className={`border border-slate-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700/50 transition w-full ${props.className||""}`} />;
+    const Input = (props) => (
+      <input {...props}
+        className={`border border-slate-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700/50 transition w-full ${props.className||""}`}
+      />
+    );
+
+    const Select = (props) => (
+      <select {...props}
+        className={`border border-slate-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700/50 transition w-full ${props.className||""}`}
+      />
+    );
 
     const Button = ({ variant="primary", className="", children, ...props }) => {
       const base = "px-4 py-3 rounded-xl font-black transition inline-flex items-center justify-center gap-2 w-full sm:w-auto active:scale-[.99]";
-      const styles = variant === "primary" ? "bg-[color:var(--brand)] text-white hover:brightness-110" :
-                     variant === "success" ? "bg-emerald-600 text-white hover:bg-emerald-700" :
-                     variant === "danger" ? "bg-[color:var(--danger)] text-white hover:brightness-110" :
-                     variant === "secondary" ? "bg-slate-100 text-slate-900 hover:bg-slate-200" : "bg-slate-900 text-white hover:bg-slate-800";
-      return <button {...props} className={`${base} ${styles} ${className}`}>{children}</button>;
+      const styles =
+        variant === "primary" ? "bg-[color:var(--brand)] text-white hover:brightness-110" :
+        variant === "success" ? "bg-emerald-600 text-white hover:bg-emerald-700" :
+        variant === "danger" ? "bg-[color:var(--danger)] text-white hover:brightness-110" :
+        variant === "secondary" ? "bg-slate-100 text-slate-900 hover:bg-slate-200" :
+        "bg-slate-900 text-white hover:bg-slate-800";
+      return <button {...props} className={`${base} ${styles} ${className}`} />;
     };
 
-    const SmallBtn = ({ className="", ...props }) => <button {...props} className={`p-2 rounded-xl hover:bg-slate-100 transition flex-shrink-0 ${className}`} />;
+    const SmallBtn = ({ className="", ...props }) => (
+      <button {...props} className={`p-2 rounded-xl hover:bg-slate-100 transition flex-shrink-0 ${className}`} />
+    );
 
     const TabBtn = ({ active, icon, label, onClick }) => (
-      <button onClick={onClick} className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-black transition w-full text-right border ${active ? "bg-teal-700/10 text-teal-800 border-teal-700/20" : "text-slate-600 hover:bg-white border-transparent hover:border-slate-200"}`}>
+      <button onClick={onClick}
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-black transition w-full text-right border
+        ${active ? "bg-teal-700/10 text-teal-800 border-teal-700/20" : "text-slate-600 hover:bg-white border-transparent hover:border-slate-200"}`}>
         <Icon name={icon} size={20} /><span>{label}</span>
       </button>
     );
 
     const SectionTitle = ({ icon, title, desc }) => (
       <div className="flex items-start gap-3 mb-4">
-        <div className="p-2.5 rounded-xl bg-teal-700/10 text-teal-700 border border-teal-700/20"><Icon name={icon} size={20}/></div>
+        <div className="p-2.5 rounded-xl bg-teal-700/10 text-teal-700 border border-teal-700/20">
+          <Icon name={icon} size={20}/>
+        </div>
         <div>
           <div className="font-black text-slate-900 text-lg leading-tight">{title}</div>
           {desc && <div className="text-xs text-slate-500 font-bold mt-1">{desc}</div>}
@@ -209,6 +246,7 @@
      ***********************/
     function App(){
       const [menuOpen, setMenuOpen] = useState(false);
+
       const [users, setUsers] = useLocalStorageState("alamal_users", DEFAULT_USERS);
       const [currentUser, setCurrentUser] = useLocalStorageState("alamal_current_user", null);
 
@@ -219,50 +257,84 @@
       const [activeTab, setActiveTab] = useState("sales");
       const [filterDate, setFilterDate] = useState(getToday());
 
-      const [company, setCompany] = useLocalStorageState("alamal_company", { name: "الأمل جروب", short: "الأمل", phone: "", address: "" });
+      const [company, setCompany] = useLocalStorageState("alamal_company", {
+        name: "الأمل جروب",
+        short: "الأمل",
+        phone: "",
+        address: ""
+      });
 
-      // Core Data (Master)
+      // Master Data
       const [products, setProducts] = useLocalStorageState("pc_products", [
         { id: 1, category:"كتاكيت", name:"كتكوت أبيض", unit:"كتكوت" },
-        { id: 2, category:"أعلاف", name:"علف بادي 23%", unit:"طن" },
+        { id: 2, category:"أعلاف",   name:"علف بادي 23%", unit:"طن" },
       ]);
-      const [suppliers, setSuppliers] = useLocalStorageState("pc_suppliers", [{ id:1, name:"معمل الوطنية" }, { id:2, name:"مصنع الإيمان" }]);
-      const [customers, setCustomers] = useLocalStorageState("pc_customers", [{ id:1, name:"مزرعة الأمل" }, { id:2, name:"محل البركة" }]);
-      const [drivers, setDrivers] = useLocalStorageState("pc_drivers", [{ id:1, name:"سيد محمود" }, { id:2, name:"أحمد علي" }]);
+
+      const [suppliers, setSuppliers] = useLocalStorageState("pc_suppliers", [
+        { id:1, name:"معمل الوطنية", phone:"" },
+        { id:2, name:"مصنع الإيمان", phone:"" },
+      ]);
+
+      const [customers, setCustomers] = useLocalStorageState("pc_customers", [
+        { id:1, name:"مزرعة الأمل", phone:"" },
+        { id:2, name:"محل البركة", phone:"" },
+      ]);
+
+      const [drivers, setDrivers] = useLocalStorageState("pc_drivers", [
+        { id:1, name:"سيد محمود", phone:"" },
+        { id:2, name:"أحمد علي", phone:"" },
+      ]);
 
       // Operations
       const [purchases, setPurchases] = useLocalStorageState("pc_purchases", []);
       const [sales, setSales] = useLocalStorageState("pc_sales", []);
       const [expenses, setExpenses] = useLocalStorageState("pc_expenses", []);
-
-      // Treasury (Manual In/Out)
       const [treasuryTx, setTreasuryTx] = useLocalStorageState("pc_treasury", []);
 
-      // Forms State
-      const [purchaseForm, setPurchaseForm] = useState({ date:getToday(), supplier:suppliers[0]?.name||"", product:products[0]?.name||"", quantity:"", buyPrice:"", paid:"", loss:"0", notes:"" });
-      const [saleForm, setSaleForm] = useState({ date:getToday(), customer:customers[0]?.name||"", driver:drivers[0]?.name||"", product:products[0]?.name||"", quantity:"", sellPrice:"", paid:"", notes:"" });
-      const [expenseForm, setExpenseForm] = useState({ date:getToday(), category:"", driver:"", amount:"", notes:"" });
-      const [personForm, setPersonForm] = useState({ type:"customer", name:"", phone:"", notes:"" });
-      const [txForm, setTxForm] = useState({ date:getToday(), type:"in", amount:"", note:"" });
+      // Forms
+      const [purchaseForm, setPurchaseForm] = useState({
+        date:getToday(), supplier:suppliers[0]?.name||"", product:products[0]?.name||"",
+        quantity:"", buyPrice:"", paid:"", loss:"0", notes:""
+      });
 
-      // Products form (كان ناقص)
-      const [productForm, setProductForm] = useState({ category:"", name:"", unit:"" });
+      const [saleForm, setSaleForm] = useState({
+        date:getToday(), customer:customers[0]?.name||"", driver:drivers[0]?.name||"",
+        product:products[0]?.name||"", quantity:"", sellPrice:"", paid:"", notes:""
+      });
 
-      // Receipts (كان ناقص)
+      const [expenseForm, setExpenseForm] = useState({
+        date:getToday(), category:"", driver:"", amount:"", notes:""
+      });
+
+      const [txForm, setTxForm] = useState({
+        date:getToday(), type:"in", amount:"", note:""
+      });
+
+      const [personForm, setPersonForm] = useState({
+        name:"", phone:""
+      });
+
+      const [productForm, setProductForm] = useState({
+        category:"", name:"", unit:""
+      });
+
+      // Receipts
       const [receiptDate, setReceiptDate] = useState(getToday());
       const [receiptCustomer, setReceiptCustomer] = useState("");
       const [receiptDriver, setReceiptDriver] = useState("");
-      const [receiptPreview, setReceiptPreview] = useState(null);
       const [receiptErr, setReceiptErr] = useState("");
+      const [receiptPreview, setReceiptPreview] = useState(null);
 
-      // Settings PIN edit (كان ناقص)
-      const [pinEdit, setPinEdit] = useState({ username: users[0]?.username || "", newPin:"" });
+      // PIN Settings
+      const [pinEdit, setPinEdit] = useState({ username: users[0]?.username || "owner", newPin:"" });
       const [pinMsg, setPinMsg] = useState("");
       const [myPin, setMyPin] = useState({ current:"", newPin:"" });
       const [myPinMsg, setMyPinMsg] = useState("");
 
       const [err, setErr] = useState({});
       const setFormErr = (key, msg) => setErr(e => ({...e, [key]: msg}));
+
+      const isAdmin = currentUser?.role === "admin";
 
       const productUnit = (name) => products.find(p => p.name === name)?.unit || "";
 
@@ -273,15 +345,7 @@
         }
       }, [currentUser, activeTab]);
 
-      // Keep pinEdit valid
-      useEffect(() => {
-        if (!users?.length) return;
-        if (!users.find(u => u.username === pinEdit.username)) {
-          setPinEdit(p => ({...p, username: users[0].username}));
-        }
-      }, [users]);
-
-      // Computed Stock
+      // Stock
       const stockByProduct = useMemo(() => {
         const map = {};
         products.forEach(p => map[p.name] = 0);
@@ -289,24 +353,23 @@
         sales.forEach(s => { map[s.product] = (map[s.product]||0) - toNumber(s.quantity); });
         return map;
       }, [products, purchases, sales]);
+
       const totalStock = useMemo(() => Object.values(stockByProduct).reduce((a,b)=>a+toNumber(b),0), [stockByProduct]);
 
-      // Computed Treasury Balance
+      // Treasury stats
       const treasuryStats = useMemo(() => {
         let totalIn = 0, totalOut = 0;
-        // From ops
         sales.forEach(s => totalIn += toNumber(s.paid));
         purchases.forEach(p => totalOut += toNumber(p.paid));
         expenses.forEach(e => totalOut += toNumber(e.amount));
-        // Manual tx
         treasuryTx.forEach(t => {
-          if(t.type === 'in') totalIn += toNumber(t.amount);
+          if(t.type === "in") totalIn += toNumber(t.amount);
           else totalOut += toNumber(t.amount);
         });
         return { totalIn, totalOut, balance: totalIn - totalOut };
       }, [sales, purchases, expenses, treasuryTx]);
 
-      // Admin KPI (Dashboard)
+      // KPIs
       const kpis = useMemo(() => {
         const owedToSuppliers = purchases.reduce((sum,p)=>sum+toNumber(p.debt),0);
         const owedFromCustomers = sales.reduce((sum,s)=>sum+toNumber(s.debt),0);
@@ -316,6 +379,7 @@
         const purchasedQty = purchases.reduce((sum,p)=>sum+toNumber(p.quantity),0);
         const purchaseValue = purchases.reduce((sum,p)=>sum+toNumber(p.total),0);
         const avgBuy = purchasedQty>0 ? purchaseValue/purchasedQty : 0;
+
         const soldQty = sales.reduce((sum,s)=>sum+toNumber(s.quantity),0);
         const estProfit = salesValue - (soldQty*avgBuy) - expensesValue;
 
@@ -325,7 +389,7 @@
         return { owedToSuppliers, owedFromCustomers, estProfit, todaySales, todayExpenses };
       }, [purchases, sales, expenses, filterDate]);
 
-      // Settlements per driver
+      // Settlements
       const settlements = useMemo(() => {
         if (!filterDate) return [];
         const map = {};
@@ -345,18 +409,49 @@
         return Object.values(map).map(d => ({...d, net: d.cash - d.expenses})).sort((a,b)=>b.net-a.net);
       }, [sales, expenses, filterDate]);
 
-      // Handlers
+      /***********************
+       * Auth
+       ***********************/
       function login(){
         setLoginErr("");
         const u = users.find(x => x.username.toLowerCase() === (loginUsername||"").trim().toLowerCase());
         if (!u || (loginPin||"").trim() !== u.pin) return setLoginErr("بيانات الدخول غير صحيحة.");
         setCurrentUser({ id:u.id, username:u.username, displayName:u.displayName, role:u.role });
         setActiveTab(u.role==="clerk" ? "sales" : "dashboard");
+        setLoginPin("");
       }
-      function logout(){ setCurrentUser(null); }
+      function logout(){
+        setCurrentUser(null);
+        setActiveTab("sales");
+        setReceiptPreview(null);
+      }
+
+      /***********************
+       * Permissions (حذف/تعديل)
+       ***********************/
+      function canDeleteRow(row){
+        if(!currentUser) return false;
+        if(isAdmin) return true;
+        // Ali: يقدر يحذف اللي هو سجله فقط
+        return row?.createdBy === currentUser.displayName;
+      }
 
       function removeRow(kind, id){
+        let row = null;
+        if(kind==="purchase") row = purchases.find(x=>x.id===id);
+        if(kind==="sale") row = sales.find(x=>x.id===id);
+        if(kind==="expense") row = expenses.find(x=>x.id===id);
+        if(kind==="tx") row = treasuryTx.find(x=>x.id===id);
+        if(kind==="customer") row = customers.find(x=>x.id===id);
+        if(kind==="supplier") row = suppliers.find(x=>x.id===id);
+        if(kind==="driver") row = drivers.find(x=>x.id===id);
+        if(kind==="product") row = products.find(x=>x.id===id);
+
+        if(!isAdmin && ["customer","supplier","driver","product","tx"].includes(kind)) return alert("غير مسموح.");
+        if(["purchase","sale","expense"].includes(kind) && !canDeleteRow(row)) return alert("مسموح تحذف اللي أنت سجّلته فقط.");
+
         if(!confirm("تأكيد الحذف؟")) return;
+
         if(kind==="purchase") setPurchases(p=>p.filter(x=>x.id!==id));
         if(kind==="sale") setSales(p=>p.filter(x=>x.id!==id));
         if(kind==="expense") setExpenses(p=>p.filter(x=>x.id!==id));
@@ -364,16 +459,28 @@
         if(kind==="customer") setCustomers(p=>p.filter(x=>x.id!==id));
         if(kind==="supplier") setSuppliers(p=>p.filter(x=>x.id!==id));
         if(kind==="driver") setDrivers(p=>p.filter(x=>x.id!==id));
+        if(kind==="product") setProducts(p=>p.filter(x=>x.id!==id));
       }
 
+      /***********************
+       * Add operations
+       ***********************/
       function addPurchase(){
         setFormErr("purchase","");
         const {date, supplier, product, quantity:q, buyPrice:bp, paid:pd, loss:ls, notes} = purchaseForm;
         const quantity = toNumber(q), buyPrice = toNumber(bp), paid = toNumber(pd), loss = toNumber(ls);
         if(!date||!supplier||!product||quantity<=0||buyPrice<=0) return setFormErr("purchase","أكمل البيانات الأساسية (تاريخ، مورد، منتج، كمية، سعر)");
-
         const total = quantity*buyPrice;
-        setPurchases(p => [{ id:Date.now(), createdBy:currentUser.displayName, date, supplier, product, quantity, buyPrice, total, paid, debt:computeDebt(total, paid), loss, notes }, ...p]);
+
+        setPurchases(p => [{
+          id:Date.now(),
+          createdBy:currentUser.displayName,
+          date, supplier, product,
+          quantity, buyPrice, total,
+          paid, debt:computeDebt(total, paid),
+          loss, notes
+        }, ...p]);
+
         setPurchaseForm(f=>({...f, quantity:"", buyPrice:"", paid:"", loss:"0", notes:""}));
       }
 
@@ -386,7 +493,15 @@
         if(quantity > (stockByProduct[product]||0)) return setFormErr("sale",`المخزون لا يكفي (${formatQty(stockByProduct[product])} متاح)`);
 
         const total = quantity*sellPrice;
-        setSales(p => [{ id:Date.now(), createdBy:currentUser.displayName, date, customer, driver, product, quantity, sellPrice, total, paid, debt:computeDebt(total, paid), notes }, ...p]);
+        setSales(p => [{
+          id:Date.now(),
+          createdBy:currentUser.displayName,
+          date, customer, driver, product,
+          quantity, sellPrice, total,
+          paid, debt:computeDebt(total, paid),
+          notes
+        }, ...p]);
+
         setSaleForm(f=>({...f, quantity:"", sellPrice:"", paid:"", notes:""}));
       }
 
@@ -395,11 +510,16 @@
         const {date, category, driver, amount:am, notes} = expenseForm;
         const amount = toNumber(am);
         if(!date||!category||amount<=0) return setFormErr("expense","أدخل التاريخ والنوع والمبلغ صحيح");
-        setExpenses(p => [{ id:Date.now(), createdBy:currentUser.displayName, date, category, driver, amount, notes }, ...p]);
+        setExpenses(p => [{
+          id:Date.now(),
+          createdBy:currentUser.displayName,
+          date, category, driver, amount, notes
+        }, ...p]);
         setExpenseForm(f=>({...f, amount:"", notes:""}));
       }
 
       function addTx(){
+        if(!isAdmin) return alert("غير مسموح.");
         setFormErr("tx","");
         const {date, type, amount:am, note} = txForm;
         const amount = toNumber(am);
@@ -408,199 +528,222 @@
         setTxForm(f=>({...f, amount:"", note:""}));
       }
 
-      function addPerson(){
+      function addPerson(kind){
+        if(!isAdmin) return alert("غير مسموح.");
         setFormErr("person","");
-        const {type, name, phone} = personForm;
-        if(!name.trim()) return setFormErr("person","يجب إدخال الاسم");
-        const newObj = { id:Date.now(), name:name.trim(), phone:phone.trim() };
-        if(type==="customer"){
-           if(customers.find(c=>c.name===newObj.name)) return setFormErr("person","الاسم موجود مسبقاً");
-           setCustomers(p=>[newObj, ...p]);
-        } else if(type==="supplier") {
-           if(suppliers.find(c=>c.name===newObj.name)) return setFormErr("person","الاسم موجود مسبقاً");
-           setSuppliers(p=>[newObj, ...p]);
+        const name = (personForm.name||"").trim();
+        const phone = (personForm.phone||"").trim();
+        if(!name) return setFormErr("person","يجب إدخال الاسم");
+
+        const newObj = { id:Date.now(), name, phone };
+
+        if(kind==="customer"){
+          if(customers.find(c=>c.name===name)) return setFormErr("person","الاسم موجود مسبقاً");
+          setCustomers(p=>[newObj, ...p]);
+        } else if(kind==="supplier"){
+          if(suppliers.find(c=>c.name===name)) return setFormErr("person","الاسم موجود مسبقاً");
+          setSuppliers(p=>[newObj, ...p]);
         } else {
-           if(drivers.find(c=>c.name===newObj.name)) return setFormErr("person","الاسم موجود مسبقاً");
-           setDrivers(p=>[newObj, ...p]);
+          if(drivers.find(c=>c.name===name)) return setFormErr("person","الاسم موجود مسبقاً");
+          setDrivers(p=>[newObj, ...p]);
         }
-        setPersonForm(f=>({...f, name:"", phone:""}));
+
+        setPersonForm({name:"", phone:""});
       }
 
       function addProduct(){
+        if(!isAdmin) return alert("غير مسموح.");
         setFormErr("products","");
         const category = (productForm.category||"").trim();
         const name = (productForm.name||"").trim();
         const unit = (productForm.unit||"").trim();
-        if(!category || !name || !unit) return setFormErr("products","أدخل (القسم + الاسم + الوحدة).");
-        if(products.find(p => p.name === name)) return setFormErr("products","اسم المنتج موجود بالفعل.");
-        setProducts(p => [{ id: Date.now(), category, name, unit }, ...p]);
+        if(!category || !name || !unit) return setFormErr("products","أدخل القسم + الاسم + الوحدة");
+        if(products.find(p=>p.name===name)) return setFormErr("products","اسم المنتج موجود مسبقاً");
+        setProducts(p=>[{ id:Date.now(), category, name, unit }, ...p]);
         setProductForm({category:"", name:"", unit:""});
       }
 
-      function removeProduct(id){
-        const prod = products.find(p=>p.id===id);
-        if(!prod) return;
-        const used = purchases.some(x=>x.product===prod.name) || sales.some(x=>x.product===prod.name);
-        const msg = used
-          ? "المنتج مستخدم في فواتير سابقة. الحذف قد يسبب لخبطة في السجلات. متأكد؟"
-          : "تأكيد حذف المنتج؟";
-        if(!confirm(msg)) return;
-        setProducts(p=>p.filter(x=>x.id!==id));
-      }
-
+      /***********************
+       * Receipts
+       ***********************/
       function buildReceipt(){
         setReceiptErr("");
         setReceiptPreview(null);
-        if(!receiptDate || !receiptCustomer) return setReceiptErr("اختار التاريخ والعميل.");
-        const list = sales
-          .filter(s => s.date === receiptDate && s.customer === receiptCustomer)
-          .filter(s => !receiptDriver || s.driver === receiptDriver);
 
-        if(list.length === 0) return setReceiptErr("مفيش فواتير للعميل ده في التاريخ المختار.");
+        if(!receiptDate) return setReceiptErr("اختار تاريخ.");
+        if(!receiptCustomer) return setReceiptErr("اختار عميل.");
 
-        const totalsRaw = list.reduce((acc, s) => {
-          acc.total += toNumber(s.total);
-          acc.paid  += toNumber(s.paid);
-          acc.debt  += toNumber(s.debt);
+        const rows = sales.filter(s =>
+          s.date === receiptDate &&
+          s.customer === receiptCustomer &&
+          (!receiptDriver || s.driver === receiptDriver)
+        );
+
+        if(rows.length === 0) return setReceiptErr("لا توجد فواتير لهذا العميل في التاريخ المحدد.");
+
+        const totals = rows.reduce((acc, r) => {
+          acc.total += toNumber(r.total);
+          acc.paid += toNumber(r.paid);
+          acc.debt += toNumber(r.debt);
           return acc;
         }, { total:0, paid:0, debt:0 });
 
         setReceiptPreview({
-          id: Date.now(),
-          company: {...company},
           date: receiptDate,
           customer: receiptCustomer,
           driver: receiptDriver || "الكل",
-          by: currentUser?.displayName || "",
-          rows: list.map(s => ({
-            id: s.id,
-            product: s.product,
-            qty: toNumber(s.quantity),
-            price: toNumber(s.sellPrice),
-            total: toNumber(s.total),
-            paid: toNumber(s.paid),
-            debt: toNumber(s.debt),
-          })),
-          totals: {
-            total: formatMoney(totalsRaw.total),
-            paid: formatMoney(totalsRaw.paid),
-            debt: formatMoney(totalsRaw.debt),
-            _raw: totalsRaw
-          }
+          rows,
+          totals
         });
       }
 
       function printReceipt(){
         if(!receiptPreview) return;
-        const esc = (x) => String(x ?? "").replace(/[&<>"]/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-        const r = receiptPreview;
+        const w = window.open("", "_blank", "width=900,height=700");
+        if(!w) return alert("الـ Pop-up اتمنع. افتح السماح للـ Pop-ups وجرب تاني.");
 
-        const rowsHtml = r.rows.map((it, idx) => `
+        const { date, customer, driver, rows, totals } = receiptPreview;
+
+        const htmlRows = rows.map((r,i)=>`
           <tr>
-            <td>${idx+1}</td>
-            <td style="text-align:right">${esc(it.product)}</td>
-            <td style="text-align:center">${formatQty(it.qty)}</td>
-            <td style="text-align:center">${formatMoney(it.price)}</td>
-            <td style="text-align:center">${formatMoney(it.total)}</td>
+            <td>${i+1}</td>
+            <td>${r.product}</td>
+            <td>${formatQty(r.quantity)} ${productUnit(r.product)}</td>
+            <td>${formatMoney(r.sellPrice)}</td>
+            <td>${formatMoney(r.total)}</td>
+            <td>${formatMoney(r.paid)}</td>
+            <td>${formatMoney(r.debt)}</td>
           </tr>
         `).join("");
 
-        const w = window.open("", "_blank", "width=420,height=700");
-        if(!w) return alert("المتصفح مانع نافذة الطباعة (Pop-up). فعّلها وجرب تاني.");
-
-        w.document.open();
-        w.document.write(`
+        const doc = `
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Receipt</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>إيصال - ${customer}</title>
 <style>
-  *{box-sizing:border-box}
-  body{font-family:Cairo,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:14px; color:#111; }
-  .wrap{max-width:380px; margin:0 auto;}
-  .h1{font-weight:800; font-size:18px; text-align:center; margin:0}
-  .muted{color:#555; font-size:12px; text-align:center; margin-top:6px}
-  .meta{display:flex; justify-content:space-between; gap:10px; font-size:12px; margin-top:12px}
-  .box{border:1px dashed #aaa; padding:10px; border-radius:12px; margin-top:12px}
-  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:12px}
-  th,td{border-bottom:1px solid #eee; padding:6px}
-  th{background:#fafafa; font-weight:800}
-  .tot{margin-top:12px; font-size:12px}
-  .tot div{display:flex; justify-content:space-between; padding:4px 0}
-  .grand{font-weight:800; font-size:13px}
-  .footer{margin-top:12px; font-size:11px; color:#666; text-align:center}
+  body{ font-family: Cairo, Arial, sans-serif; padding: 18px; color:#0f172a; }
+  .box{ border:1px solid #e2e8f0; border-radius:14px; padding:16px; }
+  .head{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  h1{ margin:0; font-size:18px; }
+  .muted{ color:#64748b; font-size:12px; font-weight:700; }
+  table{ width:100%; border-collapse: collapse; margin-top:14px; }
+  th,td{ border-bottom:1px solid #e2e8f0; padding:8px; font-size:12px; text-align:right; }
+  th{ background:#f8fafc; color:#475569; }
+  .totals{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:14px; }
+  .tcard{ border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fff; }
+  .tlabel{ font-size:11px; color:#64748b; font-weight:800; margin-bottom:4px; }
+  .tval{ font-size:16px; font-weight:900; }
+  .green{ color:#047857; }
+  .red{ color:#b91c1c; }
+  .foot{ margin-top:14px; font-size:11px; color:#64748b; font-weight:700; }
   @media print{
-    body{padding:0}
-    .wrap{max-width:80mm}
+    body{ padding: 0; }
+    .box{ border:none; }
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <p class="h1">${esc(r.company?.name || "")}</p>
-    <div class="muted">${esc(r.company?.address || "")} ${r.company?.phone ? "• " + esc(r.company.phone) : ""}</div>
-
-    <div class="box">
-      <div class="meta"><div><b>التاريخ:</b> ${esc(r.date)}</div><div><b>رقم:</b> ${esc(r.id)}</div></div>
-      <div class="meta"><div><b>العميل:</b> ${esc(r.customer)}</div><div><b>الموزع:</b> ${esc(r.driver)}</div></div>
-      <div class="meta"><div><b>بواسطة:</b> ${esc(r.by)}</div><div></div></div>
-
-      <table>
-        <thead><tr><th>#</th><th>الصنف</th><th>كمية</th><th>سعر</th><th>إجمالي</th></tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-
-      <div class="tot">
-        <div class="grand"><span>الإجمالي</span><span>${esc(r.totals.total)} ج</span></div>
-        <div><span>المدفوع</span><span>${esc(r.totals.paid)} ج</span></div>
-        <div><span>المتبقي</span><span>${esc(r.totals.debt)} ج</span></div>
+  <div class="box">
+    <div class="head">
+      <div>
+        <h1>${company.name} — إيصال مجمّع</h1>
+        <div class="muted">عميل: ${customer} • موزع: ${driver}</div>
+        <div class="muted">تاريخ: ${date}</div>
+      </div>
+      <div class="muted">
+        ${company.phone ? `ت: ${company.phone}<br/>` : ``}
+        ${company.address ? `${company.address}` : ``}
       </div>
     </div>
 
-    <div class="footer">شكراً لتعاملكم معنا</div>
-  </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الصنف</th>
+          <th>الكمية</th>
+          <th>سعر الوحدة</th>
+          <th>الإجمالي</th>
+          <th>مدفوع</th>
+          <th>متبقي</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${htmlRows}
+      </tbody>
+    </table>
 
-<script>
-  setTimeout(()=>{ window.print(); }, 200);
-</script>
+    <div class="totals">
+      <div class="tcard">
+        <div class="tlabel">الإجمالي</div>
+        <div class="tval">${formatMoney(totals.total)} ج</div>
+      </div>
+      <div class="tcard">
+        <div class="tlabel">المدفوع</div>
+        <div class="tval green">${formatMoney(totals.paid)} ج</div>
+      </div>
+      <div class="tcard">
+        <div class="tlabel">المتبقي (آجل)</div>
+        <div class="tval red">${formatMoney(totals.debt)} ج</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      تم إصدار الإيصال بواسطة: ${currentUser.displayName} — ${new Date().toLocaleString("ar-EG")}
+    </div>
+  </div>
 </body>
 </html>
-        `);
+        `;
+
+        w.document.open();
+        w.document.write(doc);
         w.document.close();
+
+        w.focus();
+        setTimeout(()=>{ try{ w.print(); } catch(e){} }, 350);
       }
 
+      /***********************
+       * PIN Change
+       ***********************/
       function changePin(){
+        if(!isAdmin) return;
         setPinMsg("");
+
         const username = (pinEdit.username||"").trim();
         const newPin = (pinEdit.newPin||"").trim();
-        if(!username) return setPinMsg("اختار المستخدم.");
-        if(!/^[0-9]{4,8}$/.test(newPin)) return setPinMsg("PIN لازم يكون من 4 لـ 8 أرقام.");
-        setUsers(arr => arr.map(u => u.username === username ? {...u, pin: newPin} : u));
+
+        if(!username) return setPinMsg("اختر المستخدم.");
+        if(!/^[0-9]{4,8}$/.test(newPin)) return setPinMsg("الـ PIN لازم يكون من 4 لـ 8 أرقام.");
+
+        setUsers(arr => arr.map(u => u.username === username ? ({...u, pin:newPin}) : u));
         setPinEdit(p=>({...p, newPin:""}));
-        setPinMsg("تم حفظ PIN بنجاح.");
+        setPinMsg("✅ تم حفظ الـ PIN بنجاح.");
       }
 
       function changeMyPin(){
         setMyPinMsg("");
         const current = (myPin.current||"").trim();
         const newPin = (myPin.newPin||"").trim();
-        if(!/^[0-9]{4,8}$/.test(newPin)) return setMyPinMsg("PIN الجديد لازم يكون من 4 لـ 8 أرقام.");
+        if(!/^[0-9]{4,8}$/.test(newPin)) return setMyPinMsg("الـ PIN الجديد لازم يكون من 4 لـ 8 أرقام.");
+
         const me = users.find(u => u.username === currentUser.username);
-        if(!me) return setMyPinMsg("حسابك مش موجود.");
-        if(current !== me.pin) return setMyPinMsg("PIN الحالي غلط.");
-        setUsers(arr => arr.map(u => u.username === me.username ? {...u, pin:newPin} : u));
-        setMyPin({current:"", newPin:""});
-        setMyPinMsg("تم تغيير PIN بنجاح.");
+        if(!me) return setMyPinMsg("مستخدم غير موجود.");
+        if(me.pin !== current) return setMyPinMsg("الـ PIN الحالي غير صحيح.");
+
+        setUsers(arr => arr.map(u => u.username === me.username ? ({...u, pin:newPin}) : u));
+        setMyPin({ current:"", newPin:"" });
+        setMyPinMsg("✅ تم تغيير الـ PIN الخاص بك.");
       }
 
-      function resetAll(){
-        if(!confirm("هتمسح كل البيانات المخزنة على الجهاز (LocalStorage). متأكد؟")) return;
-        localStorage.removeItem("alamal_users");
-        localStorage.removeItem("alamal_current_user");
-        localStorage.removeItem("alamal_company");
+      function resetAllData(){
+        if(!isAdmin) return;
+        if(!confirm("تحذير: هيمسح كل البيانات (مبيعات/مشتريات/مصروفات/خزينة/أصناف/أشخاص). متأكد؟")) return;
+
         localStorage.removeItem("pc_products");
         localStorage.removeItem("pc_suppliers");
         localStorage.removeItem("pc_customers");
@@ -609,27 +752,33 @@
         localStorage.removeItem("pc_sales");
         localStorage.removeItem("pc_expenses");
         localStorage.removeItem("pc_treasury");
+
+        // Reload
         location.reload();
       }
 
-      // Nav generation
-      const navItems = [
-        { id:"dashboard", icon:"dashboard", label:"الرئيسية (Dashboard)", group:"تقارير وماليات" },
-        { id:"treasury", icon:"coins", label:"الخزينة (الماليات)", group:"تقارير وماليات" },
-        { id:"settlements", icon:"users", label:"تقفيل اليومية (الموزعين)", group:"تقارير وماليات" },
+      /***********************
+       * Navigation
+       ***********************/
+      const navItemsBase = [
+        { id:"dashboard",  icon:"dashboard", label:"الرئيسية (Dashboard)", group:"تقارير وماليات" },
+        { id:"treasury",   icon:"coins",     label:"الخزينة (الماليات)", group:"تقارير وماليات" },
+        { id:"settlements",icon:"users",     label:"تقفيل اليومية (الموزعين)", group:"تقارير وماليات" },
 
-        { id:"sales", icon:"truck", label:"تسجيل المبيعات", group:"عمليات يومية" },
-        { id:"purchases", icon:"cart", label:"تسجيل المشتريات", group:"عمليات يومية" },
-        { id:"expenses", icon:"wallet", label:"إدارة المصروفات", group:"عمليات يومية" },
-        { id:"receipts", icon:"printer", label:"طباعة الإيصالات", group:"عمليات يومية" },
+        { id:"sales",      icon:"truck",     label:"تسجيل المبيعات", group:"عمليات يومية" },
+        { id:"purchases",  icon:"cart",      label:"تسجيل المشتريات", group:"عمليات يومية" },
+        { id:"expenses",   icon:"wallet",    label:"إدارة المصروفات", group:"عمليات يومية" },
+        { id:"receipts",   icon:"printer",   label:"طباعة الإيصالات", group:"عمليات يومية" },
 
-        { id:"products", icon:"package", label:"المنتجات والمخزون", group:"أشخاص وأصناف" },
-        { id:"customers", icon:"user", label:"قائمة العملاء", group:"أشخاص وأصناف" },
-        { id:"suppliers", icon:"briefcase", label:"الموردين والمعامل", group:"أشخاص وأصناف" },
-        { id:"drivers", icon:"car", label:"طاقم التوزيع", group:"أشخاص وأصناف" },
+        { id:"products",   icon:"package",   label:"المنتجات والمخزون", group:"أشخاص وأصناف" },
+        { id:"customers",  icon:"user",      label:"قائمة العملاء", group:"أشخاص وأصناف" },
+        { id:"suppliers",  icon:"briefcase", label:"الموردين والمعامل", group:"أشخاص وأصناف" },
+        { id:"drivers",    icon:"car",       label:"طاقم التوزيع", group:"أشخاص وأصناف" },
 
-        { id:"settings", icon:"settings", label:"إعدادات النظام", group:"إدارة" },
-      ].filter(t => canSeeTab(currentUser?.role, t.id));
+        { id:"settings",   icon:"settings",  label:"إعدادات النظام", group:"إدارة" },
+      ];
+
+      const navItems = navItemsBase.filter(t => canSeeTab(currentUser?.role, t.id));
 
       const groupedNav = useMemo(() => {
         const groups = {};
@@ -637,14 +786,27 @@
         return groups;
       }, [navItems]);
 
-      const titleByTab = navItems.reduce((acc, curr) => ({...acc, [curr.id]: curr.label}), {});
-      function navigate(id){ setActiveTab(id); setMenuOpen(false); window.scrollTo(0,0); }
+      const titleByTab = useMemo(() => (
+        navItems.reduce((acc, curr) => ({...acc, [curr.id]: curr.label}), {})
+      ), [navItems]);
 
-      // Auth Screen
+      function navigate(id){
+        setActiveTab(id);
+        setMenuOpen(false);
+        window.scrollTo(0,0);
+      }
+
+      const showDateFilter =
+        ["sales","purchases","expenses","receipts","dashboard","settlements"].includes(activeTab) &&
+        (isAdmin || ["sales","purchases","expenses","receipts"].includes(activeTab));
+
+      /***********************
+       * Auth Screen
+       ***********************/
       if(!currentUser){
         return (
           <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-soft p-6 sm:p-8">
+            <div className="w-full max-w-md bg-white rounded-3xl shadow-soft p-6 sm:p-8 border border-slate-100">
               <div className="flex items-center gap-4 mb-8">
                 <div className="p-3 rounded-2xl bg-teal-700 text-white shadow-soft"><Icon name="brand" size={32}/></div>
                 <div>
@@ -652,28 +814,37 @@
                   <p className="text-sm text-slate-500 font-bold mt-1">تسجيل الدخول للنظام</p>
                 </div>
               </div>
-              {loginErr && <Notice variant="warn"><div className="font-bold">{loginErr}</div></Notice>}
-              <div className="grid gap-4 mt-6">
-                <Field label="اسم المستخدم"><Input value={loginUsername} onChange={e=>setLoginUsername(e.target.value)} placeholder="alamal" /></Field>
-                <Field label="رمز الدخول (PIN)"><Input value={loginPin} onChange={e=>setLoginPin(e.target.value)} type="password" inputMode="numeric" placeholder="••••" /></Field>
-                <Button onClick={login} className="mt-2 py-4 text-lg shadow-md"><Icon name="lock" size={20}/> دخول للحساب</Button>
 
-                <div className="mt-2 text-xs text-slate-400 font-bold">
-                  بيانات افتراضية: <b className="text-slate-600">alamal / 1234</b> (مدير) — <b className="text-slate-600">ali / 0000</b> (بيانات)
+              {loginErr && <Notice variant="warn"><div className="font-bold">{loginErr}</div></Notice>}
+
+              <div className="grid gap-4 mt-6">
+                <Field label="اسم المستخدم">
+                  <Input value={loginUsername} onChange={e=>setLoginUsername(e.target.value)} placeholder="owner / ali" autoComplete="username" />
+                </Field>
+                <Field label="رمز الدخول (PIN)">
+                  <Input value={loginPin} onChange={e=>setLoginPin(e.target.value)} type="password" inputMode="numeric" placeholder="••••" autoComplete="current-password" />
+                </Field>
+                <Button onClick={login} className="mt-2 py-4 text-lg shadow-md">
+                  <Icon name="lock" size={20}/> دخول
+                </Button>
+
+                <div className="mt-3 p-4 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-xs text-slate-500 font-black mb-2">دخول تجريبي (غيّرهم بعدين من الإعدادات):</div>
+                  <div className="text-sm font-bold text-slate-700 flex flex-col gap-1">
+                    <span>Owner: <b>owner</b> / <b>2580</b></span>
+                    <span>Ali: <b>ali</b> / <b>1470</b></span>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
         );
       }
 
-      const isAdmin = currentUser.role === "admin";
-
-      // Show date filter for ops (للـ Admin + Ali)
-      const showDateFilter =
-        (["dashboard","settlements"].includes(activeTab) && isAdmin) ||
-        (["sales","purchases","expenses"].includes(activeTab));
-
+      /***********************
+       * Layout
+       ***********************/
       return (
         <div className="min-h-screen mobile-main-pad lg:pb-0">
 
@@ -681,8 +852,13 @@
           <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
             <div className="px-4 py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-teal-700 text-white shadow-sm lg:hidden"><Icon name="brand" size={24}/></div>
-                <div className="hidden lg:flex p-2 rounded-xl bg-teal-700 text-white shadow-sm"><Icon name="brand" size={26}/></div>
+                <div className="p-2 rounded-xl bg-teal-700 text-white shadow-sm lg:hidden">
+                  <Icon name="brand" size={24}/>
+                </div>
+                <div className="hidden lg:flex p-2 rounded-xl bg-teal-700 text-white shadow-sm">
+                  <Icon name="brand" size={26}/>
+                </div>
+
                 <div>
                   <div className="font-black text-slate-900 text-lg leading-none">{company.name}</div>
                   <div className="text-xs text-teal-700 font-bold mt-1">{titleByTab[activeTab]}</div>
@@ -697,15 +873,14 @@
 
                 <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2">
                   <span className="font-black text-slate-800 text-sm">{currentUser.displayName}</span>
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${isAdmin?'bg-teal-200 text-teal-900':'bg-amber-200 text-amber-900'}`}>{isAdmin?"مدير":"بيانات"}</span>
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${isAdmin?'bg-teal-200 text-teal-900':'bg-amber-200 text-amber-900'}`}>
+                    {isAdmin ? "مدير" : "بيانات"}
+                  </span>
                 </div>
 
-                {/* ✅ better mobile: menu in header */}
-                <button className="p-2 rounded-xl hover:bg-slate-100 lg:hidden text-slate-500" onClick={()=>setMenuOpen(true)}>
-                  <Icon name="menu" size={20}/>
+                <button className="p-2 rounded-xl hover:bg-slate-100 hidden sm:block text-slate-500" onClick={logout}>
+                  <Icon name="logout" size={20}/>
                 </button>
-
-                <button className="p-2 rounded-xl hover:bg-slate-100 hidden sm:block text-slate-500" onClick={logout}><Icon name="logout" size={20}/></button>
               </div>
             </div>
 
@@ -720,6 +895,7 @@
           </header>
 
           <div className="lg:flex max-w-[1600px] mx-auto">
+
             {/* Desktop Sidebar */}
             <aside className="hidden lg:block w-72 p-4 sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto">
               <div className="space-y-6">
@@ -727,7 +903,9 @@
                   <div key={group}>
                     <div className="text-xs text-slate-400 font-black mb-3 px-2 uppercase tracking-wider">{group}</div>
                     <div className="space-y-1.5">
-                      {items.map(t => <TabBtn key={t.id} active={activeTab===t.id} icon={t.icon} label={t.label} onClick={()=>navigate(t.id)} />)}
+                      {items.map(t => (
+                        <TabBtn key={t.id} active={activeTab===t.id} icon={t.icon} label={t.label} onClick={()=>navigate(t.id)} />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -736,18 +914,23 @@
 
             {/* Mobile Full Screen Menu Drawer */}
             {menuOpen && (
-              <div className="fixed inset-0 z-50 bg-white lg:hidden flex flex-col pb-safe">
+              <div className="fixed inset-0 z-50 bg-white lg:hidden flex flex-col pb-safe animate-in fade-in slide-in-from-bottom-4 duration-200">
                 <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
                   <div className="font-black text-lg">كل الأقسام</div>
-                  <button className="p-2 rounded-full bg-white shadow-sm text-slate-600" onClick={()=>setMenuOpen(false)}><Icon name="x" size={24}/></button>
+                  <button className="p-2 rounded-full bg-white shadow-sm text-slate-600" onClick={()=>setMenuOpen(false)}>
+                    <Icon name="x" size={24}/>
+                  </button>
                 </div>
+
                 <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
-                   {Object.entries(groupedNav).map(([group, items]) => (
+                  {Object.entries(groupedNav).map(([group, items]) => (
                     <div key={group}>
                       <div className="text-xs text-slate-400 font-black mb-3 uppercase">{group}</div>
                       <div className="grid grid-cols-2 gap-2">
                         {items.map(t => (
-                          <button key={t.id} onClick={()=>navigate(t.id)} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border text-center transition active:scale-95 ${activeTab===t.id?'bg-teal-50 border-teal-200 text-teal-800':'bg-white border-slate-100 text-slate-700'}`}>
+                          <button key={t.id} onClick={()=>navigate(t.id)}
+                            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border text-center transition active:scale-95
+                            ${activeTab===t.id?'bg-teal-50 border-teal-200 text-teal-800':'bg-white border-slate-100 text-slate-700'}`}>
                             <Icon name={t.icon} size={28} className={activeTab===t.id?'text-teal-600':'text-slate-400'}/>
                             <span className="text-xs font-black">{t.label.split(' ')[0]}</span>
                           </button>
@@ -755,47 +938,74 @@
                       </div>
                     </div>
                   ))}
-                  <div className="pt-4 border-t border-slate-100">
+
+                  <div className="pt-4 border-t border-slate-100 space-y-2">
                     <Button variant="danger" className="w-full" onClick={logout}><Icon name="logout"/> تسجيل الخروج</Button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Main Content Area */}
+            {/* Main Content */}
             <main className="flex-1 p-4 sm:p-6 lg:max-w-[calc(100%-18rem)]">
 
               {/* Dashboard */}
               {activeTab==="dashboard" && isAdmin && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <Card className="!p-4"><div className="text-xs text-slate-500 font-black mb-1">إجمالي المخزون</div><div className="text-2xl sm:text-3xl font-black text-slate-900">{formatQty(totalStock)}</div></Card>
-                    <Card className="!p-4 bg-teal-50/50 border-teal-100"><div className="text-xs text-teal-700 font-black mb-1">مبيعات ({filterDate})</div><div className="text-2xl sm:text-3xl font-black text-teal-800">{formatMoney(kpis.todaySales)}</div></Card>
-                    <Card className="!p-4 bg-red-50/50 border-red-100"><div className="text-xs text-red-700 font-black mb-1">مصروفات ({filterDate})</div><div className="text-2xl sm:text-3xl font-black text-red-800">{formatMoney(kpis.todayExpenses)}</div></Card>
-                    <Card className="!p-4 bg-amber-50/50 border-amber-100"><div className="text-xs text-amber-700 font-black mb-1">ديون السوق (العملاء)</div><div className="text-2xl sm:text-3xl font-black text-amber-800">{formatMoney(kpis.owedFromCustomers)}</div></Card>
+                    <Card className="!p-4">
+                      <div className="text-xs text-slate-500 font-black mb-1">إجمالي المخزون</div>
+                      <div className="text-2xl sm:text-3xl font-black text-slate-900">{formatQty(totalStock)}</div>
+                    </Card>
+
+                    <Card className="!p-4 bg-teal-50/50 border-teal-100">
+                      <div className="text-xs text-teal-700 font-black mb-1">مبيعات ({filterDate})</div>
+                      <div className="text-2xl sm:text-3xl font-black text-teal-800">{formatMoney(kpis.todaySales)}</div>
+                    </Card>
+
+                    <Card className="!p-4 bg-red-50/50 border-red-100">
+                      <div className="text-xs text-red-700 font-black mb-1">مصروفات ({filterDate})</div>
+                      <div className="text-2xl sm:text-3xl font-black text-red-800">{formatMoney(kpis.todayExpenses)}</div>
+                    </Card>
+
+                    <Card className="!p-4 bg-amber-50/50 border-amber-100">
+                      <div className="text-xs text-amber-700 font-black mb-1">ديون العملاء</div>
+                      <div className="text-2xl sm:text-3xl font-black text-amber-800">{formatMoney(kpis.owedFromCustomers)}</div>
+                    </Card>
                   </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                     <Card className="bg-slate-900 text-white border-slate-800">
-                        <div className="text-sm text-slate-400 font-black mb-2">رصيد الخزينة الحالي (فعلي)</div>
-                        <div className="text-4xl font-black">{formatMoney(treasuryStats.balance)} <span className="text-lg text-slate-500">ج.م</span></div>
-                     </Card>
-                     <Card>
-                        <div className="text-sm text-slate-500 font-black mb-2">ديون للمعامل (موردين)</div>
-                        <div className="text-4xl font-black text-red-600">{formatMoney(kpis.owedToSuppliers)} <span className="text-lg text-slate-400">ج.م</span></div>
-                     </Card>
+                    <Card className="bg-slate-900 text-white border-slate-800">
+                      <div className="text-sm text-slate-400 font-black mb-2">رصيد الخزينة الحالي</div>
+                      <div className="text-4xl font-black">{formatMoney(treasuryStats.balance)} <span className="text-lg text-slate-500">ج.م</span></div>
+                    </Card>
+
+                    <Card>
+                      <div className="text-sm text-slate-500 font-black mb-2">ديون للموردين</div>
+                      <div className="text-4xl font-black text-red-600">{formatMoney(kpis.owedToSuppliers)} <span className="text-lg text-slate-400">ج.م</span></div>
+                    </Card>
                   </div>
                 </div>
               )}
 
               {/* Treasury */}
               {activeTab==="treasury" && isAdmin && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card className="bg-slate-900 text-white">
-                    <SectionTitle icon="coins" title="الخزينة العامة" desc="رصيد الكاش بناءً على كل العمليات (مبيعات محصلة، مشتريات مدفوعة، مصروفات، وتسويات يدوية)." />
-                    <div className="grid grid-cols-3 gap-4 text-center mt-6">
-                      <div className="bg-white/10 rounded-2xl p-3"><div className="text-xs text-slate-400 mb-1">إجمالي الوارد</div><div className="text-xl font-black text-emerald-400">{formatMoney(treasuryStats.totalIn)}</div></div>
-                      <div className="bg-white/10 rounded-2xl p-3"><div className="text-xs text-slate-400 mb-1">إجمالي الصادر</div><div className="text-xl font-black text-red-400">{formatMoney(treasuryStats.totalOut)}</div></div>
-                      <div className="bg-teal-600 rounded-2xl p-3"><div className="text-xs text-teal-100 mb-1">الرصيد الحالي</div><div className="text-xl font-black text-white">{formatMoney(treasuryStats.balance)}</div></div>
+                    <SectionTitle icon="coins" title="الخزينة العامة" desc="الوارد/الصادر بناءً على كل العمليات + تسويات يدوية." />
+                    <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center mt-6">
+                      <div className="bg-white/10 rounded-2xl p-3">
+                        <div className="text-xs text-slate-400 mb-1">إجمالي الوارد</div>
+                        <div className="text-xl font-black text-emerald-400">{formatMoney(treasuryStats.totalIn)}</div>
+                      </div>
+                      <div className="bg-white/10 rounded-2xl p-3">
+                        <div className="text-xs text-slate-400 mb-1">إجمالي الصادر</div>
+                        <div className="text-xl font-black text-red-400">{formatMoney(treasuryStats.totalOut)}</div>
+                      </div>
+                      <div className="bg-teal-600 rounded-2xl p-3">
+                        <div className="text-xs text-teal-100 mb-1">الرصيد الحالي</div>
+                        <div className="text-xl font-black text-white">{formatMoney(treasuryStats.balance)}</div>
+                      </div>
                     </div>
                   </Card>
 
@@ -803,53 +1013,81 @@
                     <h3 className="font-black text-lg mb-4">تسوية كاش يدوي (إيداع / سحب)</h3>
                     {err.tx && <Notice variant="warn">{err.tx}</Notice>}
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                      <Field label="التاريخ" className="col-span-2 sm:col-span-1"><Input type="date" value={txForm.date} onChange={e=>setTxForm(f=>({...f,date:e.target.value}))}/></Field>
-                      <Field label="النوع">
-                         <Select value={txForm.type} onChange={e=>setTxForm(f=>({...f,type:e.target.value}))}>
-                            <option value="in">إيداع (+)</option>
-                            <option value="out">سحب (-)</option>
-                         </Select>
+                      <Field label="التاريخ" className="col-span-2 sm:col-span-1">
+                        <Input type="date" value={txForm.date} onChange={e=>setTxForm(f=>({...f,date:e.target.value}))}/>
                       </Field>
-                      <Field label="المبلغ"><Input type="number" value={txForm.amount} onChange={e=>setTxForm(f=>({...f,amount:e.target.value}))} placeholder="1000" /></Field>
-                      <Field label="البيان/السبب" className="col-span-2"><Input value={txForm.note} onChange={e=>setTxForm(f=>({...f,note:e.target.value}))} placeholder="رأس مال، مسحوبات شخصية..." /></Field>
-                      <div className="col-span-2 sm:col-span-5"><Button onClick={addTx} className="w-full sm:w-auto"><Icon name="plus"/> حفظ التسوية</Button></div>
+                      <Field label="النوع">
+                        <Select value={txForm.type} onChange={e=>setTxForm(f=>({...f,type:e.target.value}))}>
+                          <option value="in">إيداع (+)</option>
+                          <option value="out">سحب (-)</option>
+                        </Select>
+                      </Field>
+                      <Field label="المبلغ">
+                        <Input type="number" value={txForm.amount} onChange={e=>setTxForm(f=>({...f,amount:e.target.value}))} placeholder="1000" />
+                      </Field>
+                      <Field label="البيان/السبب" className="col-span-2">
+                        <Input value={txForm.note} onChange={e=>setTxForm(f=>({...f,note:e.target.value}))} placeholder="رأس مال، مسحوبات..." />
+                      </Field>
+                      <div className="col-span-2 sm:col-span-5">
+                        <Button onClick={addTx} className="w-full sm:w-auto">
+                          <Icon name="plus"/> حفظ التسوية
+                        </Button>
+                      </div>
                     </div>
                   </Card>
 
                   <Card>
-                    <h3 className="font-black mb-3">سجل التسويات اليدوية فقط</h3>
+                    <h3 className="font-black mb-3">سجل التسويات اليدوية</h3>
+
                     <div className="space-y-2 sm:hidden">
-                       {treasuryTx.map(t => (
-                         <div key={t.id} className="border border-slate-100 rounded-xl p-3 flex justify-between items-center bg-slate-50">
-                            <div>
-                              <div className="text-xs text-slate-500">{t.date}</div>
-                              <div className="font-black">{t.note || "-"}</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-black text-lg ${t.type==='in'?'text-emerald-600':'text-red-600'}`}>
-                                {t.type==='in'?'+':'-'} {formatMoney(t.amount)}
-                              </span>
-                              <SmallBtn onClick={()=>removeRow("tx", t.id)} className="text-red-500"><Icon name="trash" size={16}/></SmallBtn>
-                            </div>
-                         </div>
-                       ))}
-                       {treasuryTx.length===0 && <div className="text-center p-6 text-slate-400 font-bold">لا توجد تسويات</div>}
+                      {treasuryTx.map(t => (
+                        <div key={t.id} className="border border-slate-100 rounded-xl p-3 flex justify-between items-center bg-slate-50">
+                          <div>
+                            <div className="text-xs text-slate-500">{t.date}</div>
+                            <div className="font-black">{t.note || "-"}</div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`font-black text-lg ${t.type==='in'?'text-emerald-600':'text-red-600'}`}>
+                              {t.type==='in'?'+':'-'} {formatMoney(t.amount)}
+                            </span>
+                            <SmallBtn onClick={()=>removeRow("tx", t.id)} className="text-red-500"><Icon name="trash" size={16}/></SmallBtn>
+                          </div>
+                        </div>
+                      ))}
+                      {treasuryTx.length===0 && <div className="text-center p-6 text-slate-400 font-bold">لا يوجد تسويات</div>}
                     </div>
+
                     <div className="hidden sm:block table-wrap overflow-auto">
                       <table className="w-full text-right">
-                        <thead className="bg-slate-50 text-slate-500 text-sm"><tr><th className="p-3">حذف</th><th className="p-3">التاريخ</th><th className="p-3">النوع</th><th className="p-3">المبلغ</th><th className="p-3">البيان</th></tr></thead>
+                        <thead className="bg-slate-50 text-slate-500 text-sm">
+                          <tr>
+                            <th className="p-3">حذف</th>
+                            <th className="p-3">التاريخ</th>
+                            <th className="p-3">النوع</th>
+                            <th className="p-3">المبلغ</th>
+                            <th className="p-3">البيان</th>
+                          </tr>
+                        </thead>
                         <tbody>
                           {treasuryTx.map(t => (
                             <tr key={t.id} className="border-t border-slate-100">
-                              <td className="p-3"><SmallBtn onClick={()=>removeRow("tx", t.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn></td>
+                              <td className="p-3">
+                                <SmallBtn onClick={()=>removeRow("tx", t.id)} className="text-red-500">
+                                  <Icon name="trash" size={18}/>
+                                </SmallBtn>
+                              </td>
                               <td className="p-3 font-bold">{t.date}</td>
-                              <td className="p-3"><span className={`px-2 py-1 rounded-md text-xs font-black ${t.type==='in'?'bg-emerald-100 text-emerald-800':'bg-red-100 text-red-800'}`}>{t.type==='in'?'إيداع':'سحب'}</span></td>
+                              <td className="p-3">
+                                <span className={`px-2 py-1 rounded-md text-xs font-black ${t.type==='in'?'bg-emerald-100 text-emerald-800':'bg-red-100 text-red-800'}`}>
+                                  {t.type==='in'?'إيداع':'سحب'}
+                                </span>
+                              </td>
                               <td className="p-3 font-black">{formatMoney(t.amount)}</td>
                               <td className="p-3 font-bold text-slate-600">{t.note}</td>
                             </tr>
                           ))}
                           {treasuryTx.length===0 && (
-                            <tr><td colSpan="5" className="p-6 text-center text-slate-400 font-bold">لا توجد تسويات</td></tr>
+                            <tr><td className="p-4 text-center text-slate-400 font-bold" colSpan="5">لا يوجد تسويات</td></tr>
                           )}
                         </tbody>
                       </table>
@@ -860,79 +1098,132 @@
 
               {/* Sales */}
               {activeTab==="sales" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
-                    <SectionTitle icon="truck" title="تسجيل فاتورة بيع جديدة" desc="خصم مباشر من المخزون وإضافة للمديونية." />
+                    <SectionTitle icon="truck" title="تسجيل فاتورة بيع جديدة" desc="خصم من المخزون + تسجيل تحصيل/آجل." />
                     {err.sale && <Notice variant="warn">{err.sale}</Notice>}
+
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                      <Field label="التاريخ"><Input type="date" value={saleForm.date} onChange={e=>setSaleForm(f=>({...f,date:e.target.value}))}/></Field>
+                      <Field label="التاريخ">
+                        <Input type="date" value={saleForm.date} onChange={e=>setSaleForm(f=>({...f,date:e.target.value}))}/>
+                      </Field>
+
                       <Field label="العميل">
                         <Select value={saleForm.customer} onChange={e=>setSaleForm(f=>({...f,customer:e.target.value}))}>
-                          <option value="">اختار عميل</option>{customers.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
+                          <option value="">اختار عميل</option>
+                          {customers.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
                         </Select>
                       </Field>
+
                       <Field label="الموزع (المندوب)">
                         <Select value={saleForm.driver} onChange={e=>setSaleForm(f=>({...f,driver:e.target.value}))}>
-                          <option value="">اختار موزع</option>{drivers.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}
+                          <option value="">اختار موزع</option>
+                          {drivers.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}
                         </Select>
                       </Field>
+
                       <Field label="المنتج (المتاح)">
                         <Select value={saleForm.product} onChange={e=>setSaleForm(f=>({...f,product:e.target.value}))}>
                           {products.map(p=><option key={p.id} value={p.name}>{p.name} ({formatQty(stockByProduct[p.name])} {p.unit})</option>)}
                         </Select>
                       </Field>
-                      <Field label={`الكمية المباعة`}><Input type="number" value={saleForm.quantity} onChange={e=>setSaleForm(f=>({...f,quantity:e.target.value}))} placeholder="أرقام فقط"/></Field>
-                      <Field label="سعر الوحدة"><Input type="number" step="0.01" value={saleForm.sellPrice} onChange={e=>setSaleForm(f=>({...f,sellPrice:e.target.value}))} placeholder="27.5"/></Field>
-                      <Field label="المبلغ المحصل (كاش)"><Input type="number" step="0.01" value={saleForm.paid} onChange={e=>setSaleForm(f=>({...f,paid:e.target.value}))} placeholder="اختياري"/></Field>
-                      <Field label="ملاحظات"><Input value={saleForm.notes} onChange={e=>setSaleForm(f=>({...f,notes:e.target.value}))} placeholder="إضافات..."/></Field>
+
+                      <Field label="الكمية">
+                        <Input type="number" value={saleForm.quantity} onChange={e=>setSaleForm(f=>({...f,quantity:e.target.value}))} placeholder="أرقام فقط"/>
+                      </Field>
+
+                      <Field label="سعر الوحدة">
+                        <Input type="number" step="0.01" value={saleForm.sellPrice} onChange={e=>setSaleForm(f=>({...f,sellPrice:e.target.value}))} placeholder="27.5"/>
+                      </Field>
+
+                      <Field label="المبلغ المحصل (كاش)">
+                        <Input type="number" step="0.01" value={saleForm.paid} onChange={e=>setSaleForm(f=>({...f,paid:e.target.value}))} placeholder="اختياري"/>
+                      </Field>
+
+                      <Field label="ملاحظات">
+                        <Input value={saleForm.notes} onChange={e=>setSaleForm(f=>({...f,notes:e.target.value}))} placeholder="إضافات..."/>
+                      </Field>
+
                       <div className="col-span-2 lg:col-span-4 mt-2">
-                        <Button variant="success" onClick={addSale} className="w-full sm:w-auto py-3.5"><Icon name="plus"/> تأكيد وتسجيل البيع</Button>
+                        <Button variant="success" onClick={addSale} className="w-full sm:w-auto py-3.5">
+                          <Icon name="plus"/> تأكيد وتسجيل البيع
+                        </Button>
                       </div>
                     </div>
                   </Card>
 
                   <Card>
-                    <SectionTitle icon="receipt" title={`سجل مبيعات (${filterDate})`} />
-                    {/* Mobile Cards */}
+                    <SectionTitle icon="receipt" title={`سجل المبيعات (${filterDate})`} />
+                    {/* Mobile cards */}
                     <div className="sm:hidden space-y-3">
                       {sales.filter(s=>s.date===filterDate).map(s => (
                         <div key={s.id} className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm flex flex-col relative overflow-hidden">
-                           <div className="absolute top-0 right-0 w-1 h-full bg-teal-500"></div>
-                           <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <div className="font-black text-slate-900 text-lg">{s.customer}</div>
-                                <div className="text-xs text-slate-500">موزع: {s.driver}</div>
-                              </div>
-                              <div className="text-left">
-                                <div className="font-black text-teal-700 text-lg">{formatMoney(s.total)} ج</div>
-                                {isAdmin && s.debt > 0 && <div className="text-xs text-red-500 font-bold">آجل: {formatMoney(s.debt)}</div>}
-                              </div>
-                           </div>
-                           <div className="bg-slate-50 rounded-xl p-2 flex justify-between items-center mb-3">
-                             <div className="text-sm font-bold text-slate-700">{formatQty(s.quantity)} × {s.product}</div>
-                             <div className="text-xs font-black bg-white px-2 py-1 rounded shadow-sm border border-slate-100">{formatMoney(s.sellPrice)} ج/وحدة</div>
-                           </div>
-                           <div className="flex justify-between items-center border-t border-slate-100 pt-3">
-                             <span className="text-xs text-slate-400">{s.date}</span>
-                             <button onClick={()=>removeRow("sale", s.id)} className="text-xs text-red-500 font-black bg-red-50 px-3 py-1.5 rounded-lg">حذف</button>
-                           </div>
+                          <div className="absolute top-0 right-0 w-1 h-full bg-teal-500"></div>
+
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <div className="font-black text-slate-900 text-lg">{s.customer}</div>
+                              <div className="text-xs text-slate-500">موزع: {s.driver}</div>
+                              <div className="text-[11px] text-slate-400 font-bold mt-1">سجّل: {s.createdBy}</div>
+                            </div>
+
+                            <div className="text-left">
+                              <div className="font-black text-teal-700 text-lg">{formatMoney(s.total)} ج</div>
+                              {isAdmin && s.debt > 0 && <div className="text-xs text-red-500 font-bold">آجل: {formatMoney(s.debt)}</div>}
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 rounded-xl p-2 flex justify-between items-center mb-3">
+                            <div className="text-sm font-bold text-slate-700">{formatQty(s.quantity)} × {s.product}</div>
+                            <div className="text-xs font-black bg-white px-2 py-1 rounded shadow-sm border border-slate-100">
+                              {formatMoney(s.sellPrice)} ج/وحدة
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                            <span className="text-xs text-slate-400">{s.date}</span>
+                            {canDeleteRow(s) && (
+                              <button onClick={()=>removeRow("sale", s.id)} className="text-xs text-red-500 font-black bg-red-50 px-3 py-1.5 rounded-lg">
+                                حذف
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
-                      {sales.filter(s=>s.date===filterDate).length === 0 && <div className="text-center p-6 text-slate-400 font-bold">لا مبيعات في هذا التاريخ</div>}
+
+                      {sales.filter(s=>s.date===filterDate).length === 0 && (
+                        <div className="text-center p-6 text-slate-400 font-bold">لا مبيعات في هذا التاريخ</div>
+                      )}
                     </div>
 
-                    {/* Desktop Table */}
+                    {/* Desktop table */}
                     <div className="hidden sm:block table-wrap mt-2 overflow-auto">
-                      <table className="min-w-[1000px] w-full text-right">
+                      <table className="min-w-[1050px] w-full text-right">
                         <thead className="bg-slate-50 text-slate-500 text-sm">
                           <tr>
-                            <th className="p-3">حذف</th><th className="p-3">التاريخ</th><th className="p-3">العميل</th><th className="p-3">الموزع</th><th className="p-3">الصنف</th><th className="p-3">الكمية</th><th className="p-3">السعر</th><th className="p-3">الإجمالي</th><th className="p-3">محصل</th>{isAdmin&&<th className="p-3">آجل</th>}
+                            <th className="p-3">حذف</th>
+                            <th className="p-3">التاريخ</th>
+                            <th className="p-3">العميل</th>
+                            <th className="p-3">الموزع</th>
+                            <th className="p-3">الصنف</th>
+                            <th className="p-3">الكمية</th>
+                            <th className="p-3">السعر</th>
+                            <th className="p-3">الإجمالي</th>
+                            <th className="p-3">محصل</th>
+                            {isAdmin && <th className="p-3">آجل</th>}
+                            <th className="p-3">سجّل</th>
                           </tr>
                         </thead>
                         <tbody>
                           {sales.filter(s=>!filterDate || s.date===filterDate).map(s => (
                             <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50">
-                              <td className="p-3"><SmallBtn onClick={()=>removeRow("sale", s.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn></td>
+                              <td className="p-3">
+                                {canDeleteRow(s) ? (
+                                  <SmallBtn onClick={()=>removeRow("sale", s.id)} className="text-red-500">
+                                    <Icon name="trash" size={18}/>
+                                  </SmallBtn>
+                                ) : <span className="text-xs text-slate-300 font-bold">—</span>}
+                              </td>
                               <td className="p-3 text-sm font-bold">{s.date}</td>
                               <td className="p-3 font-black text-slate-800">{s.customer}</td>
                               <td className="p-3 font-bold text-slate-600">{s.driver}</td>
@@ -942,21 +1233,23 @@
                               <td className="p-3 font-black text-teal-700">{formatMoney(s.total)}</td>
                               <td className="p-3 font-black text-emerald-600">{formatMoney(s.paid)}</td>
                               {isAdmin && <td className="p-3 font-black text-red-500">{formatMoney(s.debt)}</td>}
+                              <td className="p-3 text-sm font-bold text-slate-500">{s.createdBy}</td>
                             </tr>
                           ))}
                           {sales.filter(s=>!filterDate || s.date===filterDate).length===0 && (
-                            <tr><td colSpan={isAdmin?10:9} className="p-6 text-center text-slate-400 font-bold">لا توجد بيانات</td></tr>
+                            <tr><td colSpan={isAdmin?11:10} className="p-6 text-center text-slate-400 font-bold">لا يوجد بيانات</td></tr>
                           )}
                         </tbody>
                       </table>
                     </div>
+
                   </Card>
                 </div>
               )}
 
               {/* Purchases */}
               {activeTab==="purchases" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
                     <SectionTitle icon="cart" title="تسجيل استلامة بضاعة" />
                     {err.purchase && <Notice variant="warn">{err.purchase}</Notice>}
@@ -964,7 +1257,7 @@
                       <Field label="التاريخ"><Input type="date" value={purchaseForm.date} onChange={e=>setPurchaseForm(f=>({...f,date:e.target.value}))}/></Field>
                       <Field label="المورد / المعمل">
                         <Select value={purchaseForm.supplier} onChange={e=>setPurchaseForm(f=>({...f,supplier:e.target.value}))}>
-                           {suppliers.map(s=><option key={s.id} value={s.name}>{s.name}</option>)}
+                          {suppliers.map(s=><option key={s.id} value={s.name}>{s.name}</option>)}
                         </Select>
                       </Field>
                       <Field label="المنتج">
@@ -978,51 +1271,70 @@
                       <Field label="نافوق / هالك"><Input type="number" value={purchaseForm.loss} onChange={e=>setPurchaseForm(f=>({...f,loss:e.target.value}))} placeholder="0"/></Field>
                       <Field label="ملاحظات"><Input value={purchaseForm.notes} onChange={e=>setPurchaseForm(f=>({...f,notes:e.target.value}))} /></Field>
                       <div className="col-span-2 lg:col-span-4 mt-2">
-                        <Button onClick={addPurchase} className="w-full sm:w-auto py-3.5"><Icon name="plus"/> حفظ الاستلامة في المخزن</Button>
+                        <Button onClick={addPurchase} className="w-full sm:w-auto py-3.5"><Icon name="plus"/> حفظ الاستلامة</Button>
                       </div>
                     </div>
                   </Card>
 
                   <Card>
                     <SectionTitle icon="package" title={`سجل المشتريات (${filterDate})`} />
-                     {/* Mobile Cards */}
-                     <div className="sm:hidden space-y-3">
+                    {/* Mobile */}
+                    <div className="sm:hidden space-y-3">
                       {purchases.filter(p=>p.date===filterDate).map(p => (
                         <div key={p.id} className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm flex flex-col relative overflow-hidden">
-                           <div className="absolute top-0 right-0 w-1 h-full bg-slate-800"></div>
-                           <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <div className="font-black text-slate-900 text-lg">{p.supplier}</div>
-                                <div className="text-xs text-slate-500">الصنف: {p.product}</div>
-                              </div>
-                              <div className="text-left">
-                                <div className="font-black text-slate-800 text-lg">{formatMoney(p.total)} ج</div>
-                                {isAdmin && p.debt > 0 && <div className="text-xs text-red-500 font-bold">باقي: {formatMoney(p.debt)}</div>}
-                              </div>
-                           </div>
-                           <div className="flex justify-between items-center text-sm font-bold bg-slate-50 rounded-xl p-2 mb-3">
-                              <span>الكمية: {formatQty(p.quantity)}</span>
-                              {toNumber(p.loss)>0 && <span className="text-red-500 text-xs">هالك: {formatQty(p.loss)}</span>}
-                           </div>
-                           <div className="flex justify-between items-center border-t border-slate-100 pt-3">
-                             <span className="text-xs text-slate-400">{p.date}</span>
-                             <button onClick={()=>removeRow("purchase", p.id)} className="text-xs text-red-500 font-black bg-red-50 px-3 py-1.5 rounded-lg">حذف</button>
-                           </div>
+                          <div className="absolute top-0 right-0 w-1 h-full bg-slate-800"></div>
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <div className="font-black text-slate-900 text-lg">{p.supplier}</div>
+                              <div className="text-xs text-slate-500">الصنف: {p.product}</div>
+                              <div className="text-[11px] text-slate-400 font-bold mt-1">سجّل: {p.createdBy}</div>
+                            </div>
+                            <div className="text-left">
+                              <div className="font-black text-slate-800 text-lg">{formatMoney(p.total)} ج</div>
+                              {isAdmin && p.debt > 0 && <div className="text-xs text-red-500 font-bold">باقي: {formatMoney(p.debt)}</div>}
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center text-sm font-bold bg-slate-50 rounded-xl p-2 mb-3">
+                            <span>الكمية: {formatQty(p.quantity)}</span>
+                            {p.loss>0 && <span className="text-red-500 text-xs">هالك: {p.loss}</span>}
+                          </div>
+                          <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                            <span className="text-xs text-slate-400">{p.date}</span>
+                            {canDeleteRow(p) && (
+                              <button onClick={()=>removeRow("purchase", p.id)} className="text-xs text-red-500 font-black bg-red-50 px-3 py-1.5 rounded-lg">حذف</button>
+                            )}
+                          </div>
                         </div>
                       ))}
-                      {purchases.filter(p=>p.date===filterDate).length === 0 && <div className="text-center p-6 text-slate-400 font-bold">لا مشتريات في هذا التاريخ</div>}
+                      {purchases.filter(p=>p.date===filterDate).length===0 && <div className="text-center p-6 text-slate-400 font-bold">لا مشتريات في هذا التاريخ</div>}
                     </div>
 
-                    {/* Desktop Table */}
+                    {/* Desktop */}
                     <div className="hidden sm:block table-wrap overflow-auto">
-                      <table className="min-w-[1000px] w-full text-right">
+                      <table className="min-w-[1050px] w-full text-right">
                         <thead className="bg-slate-50 text-slate-500 text-sm">
-                          <tr><th className="p-3">حذف</th><th className="p-3">التاريخ</th><th className="p-3">المورد</th><th className="p-3">الصنف</th><th className="p-3">الكمية</th><th className="p-3">سعر</th><th className="p-3">هالك</th><th className="p-3">الإجمالي</th>{isAdmin&&<th className="p-3">مدفوع</th>}{isAdmin&&<th className="p-3">باقي</th>}</tr>
+                          <tr>
+                            <th className="p-3">حذف</th>
+                            <th className="p-3">التاريخ</th>
+                            <th className="p-3">المورد</th>
+                            <th className="p-3">الصنف</th>
+                            <th className="p-3">الكمية</th>
+                            <th className="p-3">سعر</th>
+                            <th className="p-3">هالك</th>
+                            <th className="p-3">الإجمالي</th>
+                            {isAdmin && <th className="p-3">مدفوع</th>}
+                            {isAdmin && <th className="p-3">باقي</th>}
+                            <th className="p-3">سجّل</th>
+                          </tr>
                         </thead>
                         <tbody>
                           {purchases.filter(p=>!filterDate || p.date===filterDate).map(p => (
                             <tr key={p.id} className="border-t border-slate-100 hover:bg-slate-50">
-                              <td className="p-3"><SmallBtn onClick={()=>removeRow("purchase", p.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn></td>
+                              <td className="p-3">
+                                {canDeleteRow(p) ? (
+                                  <SmallBtn onClick={()=>removeRow("purchase", p.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn>
+                                ) : <span className="text-xs text-slate-300 font-bold">—</span>}
+                              </td>
                               <td className="p-3 text-sm font-bold">{p.date}</td>
                               <td className="p-3 font-black text-slate-800">{p.supplier}</td>
                               <td className="p-3 font-bold">{p.product}</td>
@@ -1032,29 +1344,31 @@
                               <td className="p-3 font-black text-slate-800">{formatMoney(p.total)}</td>
                               {isAdmin && <td className="p-3 font-black text-emerald-600">{formatMoney(p.paid)}</td>}
                               {isAdmin && <td className="p-3 font-black text-red-500">{formatMoney(p.debt)}</td>}
+                              <td className="p-3 text-sm font-bold text-slate-500">{p.createdBy}</td>
                             </tr>
                           ))}
                           {purchases.filter(p=>!filterDate || p.date===filterDate).length===0 && (
-                            <tr><td colSpan={isAdmin?10:8} className="p-6 text-center text-slate-400 font-bold">لا توجد بيانات</td></tr>
+                            <tr><td colSpan={isAdmin?11:9} className="p-6 text-center text-slate-400 font-bold">لا يوجد بيانات</td></tr>
                           )}
                         </tbody>
                       </table>
                     </div>
+
                   </Card>
                 </div>
               )}
 
               {/* Expenses */}
               {activeTab==="expenses" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
-                    <SectionTitle icon="wallet" title="تسجيل مصروف" desc="يخصم من الخزينة، ويمكن ربطه بموزع لخصمه من عهدته في التقفيل." />
+                    <SectionTitle icon="wallet" title="تسجيل مصروف" desc="يخصم من الخزينة، ويمكن ربطه بموزع للتقفيل." />
                     {err.expense && <Notice variant="warn">{err.expense}</Notice>}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                       <Field label="التاريخ"><Input type="date" value={expenseForm.date} onChange={e=>setExpenseForm(f=>({...f,date:e.target.value}))}/></Field>
-                      <Field label="نوع المصروف"><Input value={expenseForm.category} onChange={e=>setExpenseForm(f=>({...f,category:e.target.value}))} placeholder="بنزين، كارتة، إكراميات..."/></Field>
+                      <Field label="نوع المصروف"><Input value={expenseForm.category} onChange={e=>setExpenseForm(f=>({...f,category:e.target.value}))} placeholder="بنزين، كارتة..." /></Field>
                       <Field label="المبلغ"><Input type="number" step="0.01" value={expenseForm.amount} onChange={e=>setExpenseForm(f=>({...f,amount:e.target.value}))}/></Field>
-                      <Field label="الموزع (اختياري للتقفيل)">
+                      <Field label="الموزع (اختياري)">
                         <Select value={expenseForm.driver} onChange={e=>setExpenseForm(f=>({...f,driver:e.target.value}))}>
                           <option value="">- مصروف عام -</option>
                           {drivers.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}
@@ -1062,82 +1376,106 @@
                       </Field>
                       <Field label="ملاحظات" className="col-span-2 lg:col-span-3"><Input value={expenseForm.notes} onChange={e=>setExpenseForm(f=>({...f,notes:e.target.value}))}/></Field>
                       <div className="col-span-2 lg:col-span-1 mt-2 flex items-end">
-                        <Button variant="danger" onClick={addExpense} className="w-full"><Icon name="plus"/> خصم من الخزينة</Button>
+                        <Button variant="danger" onClick={addExpense} className="w-full"><Icon name="plus"/> خصم</Button>
                       </div>
                     </div>
                   </Card>
 
                   <Card>
-                     <SectionTitle icon="receipt" title={`سجل المصروفات (${filterDate})`} />
-                     {/* Mobile Cards */}
-                     <div className="sm:hidden space-y-3">
+                    <SectionTitle icon="receipt" title={`سجل المصروفات (${filterDate})`} />
+                    {/* Mobile */}
+                    <div className="sm:hidden space-y-3">
                       {expenses.filter(e=>e.date===filterDate).map(e => (
                         <div key={e.id} className="border border-slate-100 bg-red-50/30 rounded-2xl p-4 shadow-sm flex justify-between items-center">
-                           <div>
-                             <div className="font-black text-slate-800 text-lg">{e.category}</div>
-                             <div className="text-xs text-slate-500 font-bold mt-1">{e.date} {e.driver ? `• السائق: ${e.driver}` : ''}</div>
-                           </div>
-                           <div className="text-left flex flex-col items-end gap-2">
-                             <div className="font-black text-red-600 text-xl">-{formatMoney(e.amount)} ج</div>
-                             <button onClick={()=>removeRow("expense", e.id)} className="text-xs bg-white border border-red-100 text-red-500 px-2 py-1 rounded shadow-sm">حذف</button>
-                           </div>
+                          <div>
+                            <div className="font-black text-slate-800 text-lg">{e.category}</div>
+                            <div className="text-xs text-slate-500 font-bold mt-1">
+                              {e.date} {e.driver ? `• الموزع: ${e.driver}` : ""} • سجّل: {e.createdBy}
+                            </div>
+                          </div>
+                          <div className="text-left flex flex-col items-end gap-2">
+                            <div className="font-black text-red-600 text-xl">-{formatMoney(e.amount)} ج</div>
+                            {canDeleteRow(e) && (
+                              <button onClick={()=>removeRow("expense", e.id)} className="text-xs bg-white border border-red-100 text-red-500 px-2 py-1 rounded shadow-sm">
+                                حذف
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
-                      {expenses.filter(e=>e.date===filterDate).length === 0 && <div className="text-center p-6 text-slate-400 font-bold">لا مصروفات في هذا التاريخ</div>}
+                      {expenses.filter(e=>e.date===filterDate).length===0 && <div className="text-center p-6 text-slate-400 font-bold">لا مصروفات</div>}
                     </div>
 
-                    {/* Desktop Table */}
+                    {/* Desktop */}
                     <div className="hidden sm:block table-wrap overflow-auto">
-                      <table className="min-w-[800px] w-full text-right">
-                        <thead className="bg-slate-50 text-slate-500 text-sm"><tr><th className="p-3">حذف</th><th className="p-3">التاريخ</th><th className="p-3">النوع</th><th className="p-3">السائق</th><th className="p-3">المبلغ</th><th className="p-3">ملاحظات</th></tr></thead>
+                      <table className="min-w-[900px] w-full text-right">
+                        <thead className="bg-slate-50 text-slate-500 text-sm">
+                          <tr>
+                            <th className="p-3">حذف</th>
+                            <th className="p-3">التاريخ</th>
+                            <th className="p-3">النوع</th>
+                            <th className="p-3">الموزع</th>
+                            <th className="p-3">المبلغ</th>
+                            <th className="p-3">ملاحظات</th>
+                            <th className="p-3">سجّل</th>
+                          </tr>
+                        </thead>
                         <tbody>
                           {expenses.filter(e=>!filterDate || e.date===filterDate).map(e => (
-                            <tr key={e.id} className="border-t border-slate-100">
-                              <td className="p-3"><SmallBtn onClick={()=>removeRow("expense", e.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn></td>
+                            <tr key={e.id} className="border-t border-slate-100 hover:bg-slate-50">
+                              <td className="p-3">
+                                {canDeleteRow(e) ? (
+                                  <SmallBtn onClick={()=>removeRow("expense", e.id)} className="text-red-500"><Icon name="trash" size={18}/></SmallBtn>
+                                ) : <span className="text-xs text-slate-300 font-bold">—</span>}
+                              </td>
                               <td className="p-3 font-bold">{e.date}</td>
                               <td className="p-3 font-black text-slate-800">{e.category}</td>
                               <td className="p-3 font-bold text-slate-600">{e.driver||"-"}</td>
                               <td className="p-3 font-black text-red-600">{formatMoney(e.amount)}</td>
                               <td className="p-3 text-sm text-slate-500">{e.notes}</td>
+                              <td className="p-3 text-sm font-bold text-slate-500">{e.createdBy}</td>
                             </tr>
                           ))}
                           {expenses.filter(e=>!filterDate || e.date===filterDate).length===0 && (
-                            <tr><td colSpan="6" className="p-6 text-center text-slate-400 font-bold">لا توجد بيانات</td></tr>
+                            <tr><td colSpan="7" className="p-6 text-center text-slate-400 font-bold">لا يوجد بيانات</td></tr>
                           )}
                         </tbody>
                       </table>
                     </div>
+
                   </Card>
                 </div>
               )}
 
               {/* Settlements */}
               {activeTab==="settlements" && isAdmin && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
-                    <SectionTitle icon="users" title={`تقفيل وتصفية الموزعين (يوم: ${filterDate})`} desc="الحساب الختامي لكل سيارة (ما تم تحصيله - المصروفات = الصافي المطلوب توريده)." />
+                    <SectionTitle icon="users" title={`تقفيل وتصفية الموزعين (يوم: ${filterDate})`} desc="المحصّل - المصروفات = الصافي المطلوب توريده." />
                     {settlements.length===0 ? (
-                      <div className="text-center py-8 text-slate-400 font-bold border-2 border-dashed border-slate-100 rounded-2xl">لا توجد حركات بيع أو مصروفات للموزعين في هذا اليوم.</div>
+                      <div className="text-center py-8 text-slate-400 font-bold border-2 border-dashed border-slate-100 rounded-2xl">
+                        لا توجد حركات بيع أو مصروفات للموزعين في هذا اليوم.
+                      </div>
                     ) : (
                       <div className="grid gap-4 mt-4">
                         {settlements.map(d => (
                           <div key={d.name} className="border border-slate-200 rounded-2xl p-0 overflow-hidden shadow-sm">
-                             <div className="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
-                               <div>
-                                  <div className="font-black text-lg text-slate-900">{d.name}</div>
-                                  <div className="text-xs text-slate-500 font-bold mt-1">{d.count} عمليات بيع - إجمالي بضاعة خرجت: {formatQty(d.qty)} وحدة</div>
-                               </div>
-                               <div className="text-left">
-                                  <div className="text-xs text-slate-500 font-black mb-1">المطلوب توريده للخزنة</div>
-                                  <div className={`text-2xl font-black ${d.net >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{formatMoney(d.net)} ج</div>
-                               </div>
-                             </div>
-                             <div className="grid grid-cols-2 sm:grid-cols-4 p-4 gap-4 bg-white text-sm">
-                                <div><div className="text-slate-400 text-xs font-black mb-1">إجمالي الفواتير</div><div className="font-black">{formatMoney(d.total)}</div></div>
-                                <div><div className="text-emerald-600/70 text-xs font-black mb-1">كاش محصل (+)</div><div className="font-black text-emerald-700">{formatMoney(d.cash)}</div></div>
-                                <div><div className="text-red-500/70 text-xs font-black mb-1">مصروفات (-)</div><div className="font-black text-red-600">{formatMoney(d.expenses)}</div></div>
-                                <div><div className="text-amber-600/70 text-xs font-black mb-1">ديون آجلة للعملاء</div><div className="font-black text-amber-700">{formatMoney(d.debt)}</div></div>
-                             </div>
+                            <div className="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                              <div>
+                                <div className="font-black text-lg text-slate-900">{d.name}</div>
+                                <div className="text-xs text-slate-500 font-bold mt-1">{d.count} عمليات بيع • إجمالي كمية: {formatQty(d.qty)}</div>
+                              </div>
+                              <div className="text-left">
+                                <div className="text-xs text-slate-500 font-black mb-1">المطلوب توريده</div>
+                                <div className={`text-2xl font-black ${d.net >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{formatMoney(d.net)} ج</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 p-4 gap-4 bg-white text-sm">
+                              <div><div className="text-slate-400 text-xs font-black mb-1">إجمالي الفواتير</div><div className="font-black">{formatMoney(d.total)}</div></div>
+                              <div><div className="text-emerald-600/70 text-xs font-black mb-1">كاش محصل</div><div className="font-black text-emerald-700">{formatMoney(d.cash)}</div></div>
+                              <div><div className="text-red-500/70 text-xs font-black mb-1">مصروفات</div><div className="font-black text-red-600">{formatMoney(d.expenses)}</div></div>
+                              <div><div className="text-amber-600/70 text-xs font-black mb-1">ديون آجلة</div><div className="font-black text-amber-700">{formatMoney(d.debt)}</div></div>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1146,132 +1484,143 @@
                 </div>
               )}
 
-              {/* Master Data Sections */}
-              {["products", "customers", "suppliers", "drivers"].includes(activeTab) && isAdmin && (
-                <div className="space-y-4">
-                  {/* Products Special View */}
-                  {activeTab === "products" && (
-                    <Card>
-                      <SectionTitle icon="package" title="إدارة المنتجات والمخزون" desc="إضافة أصناف جديدة بأسماء ووحدات مختلفة." />
-                      {err.products && <Notice variant="warn">{err.products}</Notice>}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <Field label="القسم"><Input value={productForm.category} onChange={e=>setProductForm(f=>({...f,category:e.target.value}))} placeholder="كتاكيت، أعلاف..."/></Field>
-                        <Field label="الاسم"><Input value={productForm.name} onChange={e=>setProductForm(f=>({...f,name:e.target.value}))}/></Field>
-                        <Field label="الوحدة"><Input value={productForm.unit} onChange={e=>setProductForm(f=>({...f,unit:e.target.value}))} placeholder="كتكوت، طن..."/></Field>
-                        <div className="flex items-end"><Button onClick={addProduct} className="w-full"><Icon name="plus"/> إضافة</Button></div>
-                      </div>
+              {/* Products */}
+              {activeTab==="products" && isAdmin && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                  <Card>
+                    <SectionTitle icon="package" title="إدارة المنتجات والمخزون" desc="إضافة أصناف جديدة بأسماء ووحدات مختلفة." />
+                    {err.products && <Notice variant="warn">{err.products}</Notice>}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-6">
-                        {products.map(p => (
-                          <div key={p.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50 relative flex justify-between items-center">
-                            <div>
-                              <div className="text-xs text-teal-700 font-black mb-1">{p.category}</div>
-                              <div className="font-black text-lg text-slate-800">{p.name}</div>
-                              <div className="text-sm font-bold text-slate-500 mt-2">المخزون: <span className="text-slate-900 font-black">{formatQty(stockByProduct[p.name])}</span> {p.unit}</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <Field label="القسم"><Input value={productForm.category} onChange={e=>setProductForm(f=>({...f,category:e.target.value}))} placeholder="كتاكيت، أعلاف..." /></Field>
+                      <Field label="الاسم"><Input value={productForm.name} onChange={e=>setProductForm(f=>({...f,name:e.target.value}))} placeholder="اسم المنتج" /></Field>
+                      <Field label="الوحدة"><Input value={productForm.unit} onChange={e=>setProductForm(f=>({...f,unit:e.target.value}))} placeholder="كتكوت، طن..." /></Field>
+                      <div className="flex items-end"><Button onClick={addProduct} className="w-full"><Icon name="plus"/> إضافة</Button></div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-6">
+                      {products.map(p => (
+                        <div key={p.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50 relative flex justify-between items-center">
+                          <div>
+                            <div className="text-xs text-teal-700 font-black mb-1">{p.category}</div>
+                            <div className="font-black text-lg text-slate-800">{p.name}</div>
+                            <div className="text-sm font-bold text-slate-500 mt-2">
+                              المخزون: <span className="text-slate-900 font-black">{formatQty(stockByProduct[p.name])}</span> {p.unit}
                             </div>
-                            <button onClick={()=>removeProduct(p.id)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-red-400 hover:text-red-600 shadow-sm border border-slate-200"><Icon name="trash"/></button>
                           </div>
-                        ))}
-                      </div>
-                    </Card>
-                  )}
+                          <button onClick={()=>removeRow("product", p.id)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-red-400 hover:text-red-600 shadow-sm border border-slate-200">
+                            <Icon name="trash"/>
+                          </button>
+                        </div>
+                      ))}
+                      {products.length===0 && <div className="text-center p-6 text-slate-400 font-bold">لا يوجد منتجات</div>}
+                    </div>
+                  </Card>
+                </div>
+              )}
 
-                  {/* Persons View */}
-                  {["customers", "suppliers", "drivers"].includes(activeTab) && (
-                    <Card>
-                      <SectionTitle
-                        icon={activeTab==="customers" ? "user" : activeTab==="suppliers" ? "briefcase" : "car"}
-                        title={`إدارة ${activeTab==="customers" ? "العملاء" : activeTab==="suppliers" ? "الموردين/المعامل" : "الموزعين/المناديب"}`}
-                      />
-                      {err.person && <Notice variant="warn">{err.person}</Notice>}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <Field label="الاسم">
-                          <Input
-                            value={personForm.name}
-                            onChange={e=>setPersonForm(f=>({...f, name:e.target.value, type:activeTab.slice(0,-1)}))}
-                            placeholder="الاسم كامل..."
-                          />
-                        </Field>
-                        <Field label="رقم التليفون / بيانات"><Input value={personForm.phone} onChange={e=>setPersonForm(f=>({...f, phone:e.target.value}))}/></Field>
-                        <div className="flex items-end"><Button onClick={addPerson} className="w-full"><Icon name="plus"/> تسجيل جديد</Button></div>
-                      </div>
+              {/* Customers / Suppliers / Drivers */}
+              {["customers","suppliers","drivers"].includes(activeTab) && isAdmin && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                  <Card>
+                    <SectionTitle
+                      icon={activeTab==="customers" ? "user" : activeTab==="suppliers" ? "briefcase" : "car"}
+                      title={`إدارة ${activeTab==="customers" ? "العملاء" : activeTab==="suppliers" ? "الموردين/المعامل" : "الموزعين/المناديب"}`}
+                    />
+                    {err.person && <Notice variant="warn">{err.person}</Notice>}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {(activeTab==="customers"?customers:activeTab==="suppliers"?suppliers:drivers).map(p => (
-                          <div key={p.id} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm flex justify-between items-center">
-                            <div>
-                              <div className="font-black text-slate-800">{p.name}</div>
-                              <div className="text-xs text-slate-500 font-bold mt-1">{p.phone || "بدون رقم"}</div>
-                            </div>
-                            <button onClick={()=>removeRow(activeTab.slice(0,-1), p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Icon name="trash" size={18}/></button>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <Field label="الاسم"><Input value={personForm.name} onChange={e=>setPersonForm(f=>({...f, name:e.target.value}))} placeholder="الاسم كامل..." /></Field>
+                      <Field label="رقم التليفون / بيانات"><Input value={personForm.phone} onChange={e=>setPersonForm(f=>({...f, phone:e.target.value}))} placeholder="اختياري" /></Field>
+                      <div className="flex items-end">
+                        <Button onClick={()=>addPerson(activeTab==="customers"?"customer":activeTab==="suppliers"?"supplier":"driver")} className="w-full">
+                          <Icon name="plus"/> تسجيل جديد
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {(activeTab==="customers"?customers:activeTab==="suppliers"?suppliers:drivers).map(p => (
+                        <div key={p.id} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm flex justify-between items-center">
+                          <div>
+                            <div className="font-black text-slate-800">{p.name}</div>
+                            <div className="text-xs text-slate-500 font-bold mt-1">{p.phone || "بدون رقم"}</div>
                           </div>
-                        ))}
-                      </div>
-                    </Card>
-                  )}
+                          <button onClick={()=>removeRow(activeTab==="customers"?"customer":activeTab==="suppliers"?"supplier":"driver", p.id)}
+                            className="text-red-400 p-2 hover:bg-red-50 rounded-lg">
+                            <Icon name="trash" size={18}/>
+                          </button>
+                        </div>
+                      ))}
+                      {(activeTab==="customers"?customers:activeTab==="suppliers"?suppliers:drivers).length===0 && (
+                        <div className="text-center p-6 text-slate-400 font-bold">لا يوجد بيانات</div>
+                      )}
+                    </div>
+                  </Card>
                 </div>
               )}
 
               {/* Receipts */}
               {activeTab==="receipts" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
                     <SectionTitle icon="printer" title="إصدار وطباعة إيصالات العملاء" desc="حدد العميل والتاريخ لتجميع فواتيره في إيصال واحد للطباعة." />
                     {receiptErr && <Notice variant="warn">{receiptErr}</Notice>}
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                       <Field label="التاريخ"><Input type="date" value={receiptDate} onChange={(e)=>setReceiptDate(e.target.value)} /></Field>
+
                       <Field label="العميل">
                         <Select value={receiptCustomer} onChange={(e)=>setReceiptCustomer(e.target.value)}>
                           <option value="">اختر عميل</option>
                           {customers.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </Select>
                       </Field>
-                      <Field label="الموزع (فلتر اختياري)">
+
+                      <Field label="الموزع (فلترة)">
                         <Select value={receiptDriver} onChange={(e)=>setReceiptDriver(e.target.value)}>
-                          <option value="">الكل</option>{drivers.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                          <option value="">الكل</option>
+                          {drivers.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                         </Select>
                       </Field>
-                      <div className="col-span-2 sm:col-span-1 flex items-end"><Button onClick={buildReceipt} className="w-full">بحث وتجميع</Button></div>
+
+                      <div className="col-span-2 sm:col-span-1 flex items-end">
+                        <Button onClick={buildReceipt} className="w-full">بحث وتجميع</Button>
+                      </div>
                     </div>
 
                     {receiptPreview && (
                       <div className="mt-6 border-t border-slate-200 pt-6">
                         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center">
                           <h3 className="text-xl font-black text-slate-900 mb-2">فاتورة مجمعة: {receiptPreview.customer}</h3>
+
                           <div className="flex justify-center gap-6 text-sm font-bold text-slate-600 mb-6 flex-wrap">
-                             <span>التاريخ: {receiptPreview.date}</span>
-                             <span>الموزع: {receiptPreview.driver}</span>
-                             <span>بواسطة: {receiptPreview.by}</span>
+                            <span>التاريخ: {receiptPreview.date}</span>
+                            <span>الموزع: {receiptPreview.driver}</span>
                           </div>
 
                           <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-6">
-                             <div className="bg-white p-3 rounded-xl border border-slate-100"><div className="text-xs text-slate-400 mb-1">الإجمالي</div><div className="font-black text-lg">{receiptPreview.totals.total}</div></div>
-                             <div className="bg-white p-3 rounded-xl border border-slate-100"><div className="text-xs text-emerald-500 mb-1">المدفوع</div><div className="font-black text-lg text-emerald-700">{receiptPreview.totals.paid}</div></div>
-                             <div className="bg-white p-3 rounded-xl border border-slate-100"><div className="text-xs text-red-400 mb-1">المتبقي (آجل)</div><div className="font-black text-lg text-red-600">{receiptPreview.totals.debt}</div></div>
+                            <div className="bg-white p-3 rounded-xl border border-slate-100">
+                              <div className="text-xs text-slate-400 mb-1">الإجمالي</div>
+                              <div className="font-black text-lg">{formatMoney(receiptPreview.totals.total)}</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-xl border border-slate-100">
+                              <div className="text-xs text-emerald-500 mb-1">المدفوع</div>
+                              <div className="font-black text-lg text-emerald-700">{formatMoney(receiptPreview.totals.paid)}</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-xl border border-slate-100">
+                              <div className="text-xs text-red-400 mb-1">المتبقي (آجل)</div>
+                              <div className="font-black text-lg text-red-600">{formatMoney(receiptPreview.totals.debt)}</div>
+                            </div>
                           </div>
 
-                          <div className="hidden sm:block table-wrap overflow-auto bg-white rounded-2xl border border-slate-100">
-                            <table className="min-w-[700px] w-full text-right">
-                              <thead className="bg-slate-50 text-slate-500 text-sm">
-                                <tr><th className="p-3">#</th><th className="p-3">الصنف</th><th className="p-3">الكمية</th><th className="p-3">سعر</th><th className="p-3">الإجمالي</th></tr>
-                              </thead>
-                              <tbody>
-                                {receiptPreview.rows.map((r, idx)=>(
-                                  <tr key={r.id} className="border-t border-slate-100">
-                                    <td className="p-3 font-black">{idx+1}</td>
-                                    <td className="p-3 font-bold">{r.product}</td>
-                                    <td className="p-3 font-black">{formatQty(r.qty)}</td>
-                                    <td className="p-3 font-bold">{formatMoney(r.price)}</td>
-                                    <td className="p-3 font-black text-teal-700">{formatMoney(r.total)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          <Button variant="success" onClick={printReceipt} className="px-8 py-4 text-lg shadow-md mt-6">
-                            <Icon name="printer" size={24}/> طباعة الإيصال (حراري/A4)
+                          <Button variant="success" onClick={printReceipt} className="px-8 py-4 text-lg shadow-md">
+                            <Icon name="printer" size={24}/> طباعة الإيصال
                           </Button>
+
+                          <div className="mt-4 text-xs text-slate-500 font-bold">
+                            لو الطباعة ما فتحتش: فعّل Pop-ups للصفحة.
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1281,12 +1630,12 @@
 
               {/* Settings */}
               {activeTab==="settings" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
                   <Card>
                     <SectionTitle icon="settings" title="إعدادات النظام" />
 
                     <div className="mb-6">
-                      <h4 className="font-black text-slate-800 mb-3 border-b pb-2">بيانات الشركة (تطبع على الإيصالات)</h4>
+                      <h4 className="font-black text-slate-800 mb-3 border-b pb-2">بيانات الشركة (تظهر في الإيصالات)</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <Field label="الاسم"><Input value={company.name} onChange={e=>setCompany(c=>({...c, name:e.target.value}))}/></Field>
                         <Field label="اختصار"><Input value={company.short} onChange={e=>setCompany(c=>({...c, short:e.target.value}))}/></Field>
@@ -1296,19 +1645,20 @@
                     </div>
 
                     <div className="mb-6">
-                      <h4 className="font-black text-slate-800 mb-3 border-b pb-2">تغيير PIN الخاص بحسابك</h4>
-                      {myPinMsg && <Notice variant="info"><div className="font-bold">{myPinMsg}</div></Notice>}
+                      <h4 className="font-black text-slate-800 mb-3 border-b pb-2">تغيير PIN الخاص بك</h4>
+                      {myPinMsg && <Notice variant={myPinMsg.includes("✅") ? "info" : "warn"}>{myPinMsg}</Notice>}
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <Field label="PIN الحالي"><Input value={myPin.current} onChange={(e)=>setMyPin(p=>({...p,current:e.target.value}))} type="password" inputMode="numeric" placeholder="••••" /></Field>
-                        <Field label="PIN الجديد"><Input value={myPin.newPin} onChange={(e)=>setMyPin(p=>({...p,newPin:e.target.value}))} type="password" inputMode="numeric" placeholder="4-8 أرقام" /></Field>
-                        <div className="col-span-2 sm:col-span-1 flex items-end"><Button onClick={changeMyPin} className="w-full">حفظ</Button></div>
+                        <Field label="PIN الحالي"><Input value={myPin.current} onChange={e=>setMyPin(p=>({...p,current:e.target.value}))} type="password" inputMode="numeric" /></Field>
+                        <Field label="PIN الجديد"><Input value={myPin.newPin} onChange={e=>setMyPin(p=>({...p,newPin:e.target.value}))} type="password" inputMode="numeric" /></Field>
+                        <div className="flex items-end"><Button onClick={changeMyPin} className="w-full">حفظ</Button></div>
                       </div>
+                      <div className="text-xs text-slate-500 font-bold mt-3">ملاحظة: الـ PIN لازم يكون من 4 إلى 8 أرقام.</div>
                     </div>
 
                     {isAdmin && (
                       <div className="mb-6">
-                        <h4 className="font-black text-slate-800 mb-3 border-b pb-2">تغيير PIN للمستخدمين (Admin فقط)</h4>
-                        {pinMsg && <Notice variant="info"><div className="font-bold">{pinMsg}</div></Notice>}
+                        <h4 className="font-black text-slate-800 mb-3 border-b pb-2">إدارة PIN للمستخدمين (Admin فقط)</h4>
+                        {pinMsg && <Notice variant={pinMsg.includes("✅") ? "info" : "warn"}>{pinMsg}</Notice>}
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           <Field label="المستخدم">
                             <Select value={pinEdit.username} onChange={(e)=>setPinEdit(p=>({...p,username:e.target.value}))}>
@@ -1316,19 +1666,18 @@
                             </Select>
                           </Field>
                           <Field label="PIN الجديد"><Input value={pinEdit.newPin} onChange={(e)=>setPinEdit(p=>({...p,newPin:e.target.value}))} type="password" inputMode="numeric"/></Field>
-                          <div className="col-span-2 sm:col-span-1 flex items-end"><Button onClick={changePin} className="w-full">حفظ التغيير</Button></div>
+                          <div className="flex items-end"><Button onClick={changePin} className="w-full">حفظ التغيير</Button></div>
+                        </div>
+
+                        <div className="mt-4 border-t pt-4">
+                          <Button variant="danger" onClick={resetAllData} className="w-full sm:w-auto">
+                            مسح كل البيانات (Reset)
+                          </Button>
+                          <div className="text-xs text-red-600 font-bold mt-2">تحذير: ده هيمسح كل العمليات والبيانات المخزنة على الجهاز.</div>
                         </div>
                       </div>
                     )}
 
-                    {isAdmin && (
-                      <div className="pt-4 border-t border-slate-200">
-                        <h4 className="font-black text-slate-800 mb-3">إدارة متقدمة</h4>
-                        <Button variant="danger" onClick={resetAll} className="w-full sm:w-auto">
-                          <Icon name="trash"/> مسح كل البيانات (Reset)
-                        </Button>
-                      </div>
-                    )}
                   </Card>
                 </div>
               )}
@@ -1336,27 +1685,27 @@
             </main>
           </div>
 
-          {/* Fixed Bottom Navigation (Mobile Only) */}
+          {/* Fixed Bottom Nav (Mobile) */}
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around items-center z-40 pb-safe px-1 pt-1 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-             <button onClick={()=>navigate(isAdmin?"dashboard":"sales")} className={`flex flex-col items-center flex-1 py-2 ${activeTab==="dashboard"?'text-teal-700':'text-slate-400'}`}>
-                <Icon name="home" size={24}/>
-                <span className="text-[10px] font-black mt-1">{isAdmin?"الرئيسية":"مبيعات"}</span>
-             </button>
+            <button onClick={()=>navigate(isAdmin?"dashboard":"sales")} className={`flex flex-col items-center flex-1 py-2 ${activeTab===(isAdmin?"dashboard":"sales")?'text-teal-700':'text-slate-400'}`}>
+              <Icon name="home" size={24}/>
+              <span className="text-[10px] font-black mt-1">{isAdmin?"الرئيسية":"مبيعات"}</span>
+            </button>
 
-             <button onClick={()=>navigate("sales")} className={`flex flex-col items-center flex-1 py-2 ${activeTab==="sales"?'text-teal-700':'text-slate-400'}`}>
-                <Icon name="truck" size={24}/>
-                <span className="text-[10px] font-black mt-1">مبيعات</span>
-             </button>
+            <button onClick={()=>navigate("sales")} className={`flex flex-col items-center flex-1 py-2 ${activeTab==="sales"?'text-teal-700':'text-slate-400'}`}>
+              <Icon name="truck" size={24}/>
+              <span className="text-[10px] font-black mt-1">مبيعات</span>
+            </button>
 
-             <button onClick={()=>navigate("purchases")} className={`flex flex-col items-center flex-1 py-2 ${activeTab==="purchases"?'text-teal-700':'text-slate-400'}`}>
-                <Icon name="cart" size={24}/>
-                <span className="text-[10px] font-black mt-1">مشتريات</span>
-             </button>
+            <button onClick={()=>navigate("purchases")} className={`flex flex-col items-center flex-1 py-2 ${activeTab==="purchases"?'text-teal-700':'text-slate-400'}`}>
+              <Icon name="cart" size={24}/>
+              <span className="text-[10px] font-black mt-1">مشتريات</span>
+            </button>
 
-             <button onClick={()=>setMenuOpen(true)} className={`flex flex-col items-center flex-1 py-2 ${menuOpen?'text-teal-700':'text-slate-400'}`}>
-                <Icon name="menu" size={24}/>
-                <span className="text-[10px] font-black mt-1">القائمة</span>
-             </button>
+            <button onClick={()=>setMenuOpen(true)} className={`flex flex-col items-center flex-1 py-2 ${menuOpen?'text-teal-700':'text-slate-400'}`}>
+              <Icon name="menu" size={24}/>
+              <span className="text-[10px] font-black mt-1">القائمة</span>
+            </button>
           </div>
 
         </div>
